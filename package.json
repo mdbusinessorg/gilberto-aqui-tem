@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy:netlify": "netlify deploy --build --prod --site 628b767f-ee13-4662-b239-852f0bf00a35"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
