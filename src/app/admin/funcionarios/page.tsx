@@ -3,6 +3,7 @@ import { PageHeader, Card, Table, THead, TBody, Badge, EmptyState } from '@/comp
 import { formatDate } from '@/lib/utils'
 import { DEPARTMENTS } from '@/lib/labels'
 import { EmployeeForm } from './form'
+import { RoleManager } from './roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ export default async function EmployeesPage() {
                 <td className="text-xs text-ink-muted">{String(e.schedule_start).slice(0, 5)}–{String(e.schedule_end).slice(0, 5)}</td>
                 <td><Badge tone={e.status === 'activo' ? 'green' : 'neutral'}>{e.status === 'activo' ? 'Activo' : e.status}</Badge></td>
                 <td className="text-xs text-ink-muted">{e.hire_date ? formatDate(e.hire_date) : '—'}</td>
-                <td><EmployeeForm employee={e} /></td>
+                <td><div className="flex items-center justify-end gap-1"><RoleManager employeeId={e.id} profileId={e.profile_id} currentRole={e.profiles?.role} /><EmployeeForm employee={e} /></div></td>
               </tr>
             ))}
           </TBody>
