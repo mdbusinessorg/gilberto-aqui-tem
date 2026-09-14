@@ -1,5 +1,14 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
+
+export function Logo({ className, light, compact }: { className?: string; light?: boolean; compact?: boolean }) {
+  return (
+    <Link href="/" className={cn('inline-flex items-center shrink-0', className)} aria-label="Gilberto Aqui Tem — início">
+      <Image src="/brand/logo.png" alt="Gilberto Aqui Tem — Telemóvel & Acessórios" width={190} height={90} priority className={cn('h-9 w-auto object-contain', light && 'brightness-0 invert', compact && 'h-8')} />
+    </Link>
+  )
+}
 
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -9,19 +18,5 @@ export function LogoMark({ className }: { className?: string }) {
       <path d="M12 21.8V30h16v-8.2" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" fill="none" />
       <rect x="17" y="24" width="6" height="6" rx="1" fill="#fff" />
     </svg>
-  )
-}
-
-export function Logo({ className, light, compact }: { className?: string; light?: boolean; compact?: boolean }) {
-  return (
-    <Link href="/" className={cn('inline-flex items-center gap-2.5', className)} aria-label="Gilberto Aqui Tem — início">
-      <LogoMark />
-      {!compact && (
-        <span className="leading-none">
-          <span className={cn('block text-[15px] font-bold tracking-tight uppercase', light ? 'text-white' : 'text-brand-800')}>Gilberto Aqui Tem</span>
-          <span className={cn('block text-[10.5px] font-medium tracking-wide mt-0.5', light ? 'text-brand-200' : 'text-ink-muted')}>Telemóvel &amp; Acessórios</span>
-        </span>
-      )}
-    </Link>
   )
 }

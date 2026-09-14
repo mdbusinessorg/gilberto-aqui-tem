@@ -1,7 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { getProducts, getCategories, getBrands, type ProductFilters } from '@/lib/store/queries'
+import { getProducts, getCategories, getBrands, type ProductFilters, type StorefrontProduct } from '@/lib/store/queries'
+import { priceOf } from '@/lib/store/price'
+import { formatKz } from '@/lib/utils'
+import Image from 'next/image'
+import { Smartphone, Search } from 'lucide-react'
 import { ProductGrid } from '@/components/store/product-card'
 import { EmptyState, Input, Select, Button } from '@/components/ui'
 
@@ -17,7 +21,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
     featured: searchParams.destaque === '1', promo: searchParams.promo === '1',
     inStock: searchParams.stock !== 'todos', page: searchParams.pag ? Number(searchParams.pag) : 1,
   }
-  const [{ products, total, page, perPage }, categories, brands] = await Promise.all([getProducts(filters), getCategories(), getBrands()])
+  const [{ products, total, page, perPage }, categories, brands, topRated] = await Promise.all([getProducts(filters), getCategories(), getBrands(), getProducts({ sort: 'rating', inStock: true, perPage: 4 })])
   const pages = Math.ceil(total / perPage)
   const qs = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams()
@@ -34,16 +38,48 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row">
-        <aside className="lg:w-56 shrink-0">
-          <form className="grid grid-cols-2 gap-3 lg:grid-cols-1" action="/loja">
-            {filters.q && <input type="hidden" name="q" value={filters.q} />}
-            <div>
-              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">Categoria</p>
-              <Select name="categoria" defaultValue={filters.category ?? ''}>
-                <option value="">Todas</option>
-                {categories.map((c) => <option key={c.id} value={c.slug}>{c.name}</option>)}
-              </Select>
+        <aside className="lg:w-60 shrink-0 space-y-6">
+          {/* Pesquisa */}
+          <form action="/loja" className="flex">
+            <input name="q" defaultValue={filters.q ?? ''} placeholder="Procurar na loja" className="h-10 w-full rounded-l-md border border-line px-3 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500" />
+            <button className="h-10 w-11 shrink-0 rounded-r-md bg-brand-600 text-white flex items-center justify-center" aria-label="Procurar"><Search className="h-4 w-4" /></button>
+          </form>
+
+          {/* Categorias */}
+          <nav className="rounded-md border border-line">
+            <p className="border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink">Categorias</p>
+            <ul className="divide-y divide-line">
+              {categories.map((c) => (
+                <li key={c.id}><Link href={qs({ categoria: c.slug, pag: '1' })} className={`block px-4 py-2 text-[13px] hover:bg-surface ${filters.category === c.slug ? 'font-semibold text-brand-700' : 'text-ink-soft'}`}>{c.name}</Link></li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Melhor avaliados */}
+          {topRated.products.length > 0 && (
+            <div className="hidden lg:block rounded-md border border-line">
+              <p className="border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink">Melhor avaliados</p>
+              <ul className="divide-y divide-line">
+                {topRated.products.map((p: StorefrontProduct) => (
+                  <li key={p.id}>
+                    <Link href={`/produto/${p.slug}`} className="flex items-center gap-3 px-4 py-3 hover:bg-surface">
+                      <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded border border-line bg-white">
+                        {p.image_url ? <Image src={p.image_url} alt="" fill sizes="44px" className="object-contain" /> : <Smartphone className="m-2 h-6 w-6 text-ink-muted/40" />}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="line-clamp-1 text-[13px] text-ink">{p.name}</span>
+                        <span className="text-[13px] font-semibold text-brand-700 tabular">{formatKz(priceOf(p).final)}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          )}
+
+          <form className="grid grid-cols-2 gap-3 lg:grid-cols-1 rounded-md border border-line p-4" action="/loja">
+            {filters.q && <input type="hidden" name="q" value={filters.q} />}
+
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">Marca</p>
               <Select name="marca" defaultValue={filters.brand ?? ''}>

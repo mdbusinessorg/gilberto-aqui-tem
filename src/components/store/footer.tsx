@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { Instagram, Facebook, MessageCircle, MapPin, Clock } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
+import { NewsletterBar } from './newsletter'
 import { waLink, supportMessage, WHATSAPP_DISPLAY } from '@/lib/whatsapp'
 import type { NavCategory } from './header'
 
 export function StoreFooter({ categories, settings }: { categories: NavCategory[]; settings: { address?: string; hours?: string; instagram?: string; facebook?: string } }) {
   return (
-    <footer className="mt-20 border-t border-line bg-surface">
+    <footer className="mt-16 border-t border-line bg-surface">
+      <NewsletterBar />
       <div className="shell grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Logo />
