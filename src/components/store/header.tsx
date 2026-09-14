@@ -2,7 +2,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Search, ShoppingBag, User, Menu, X, Heart, MessageCircle, LayoutDashboard } from 'lucide-react'
+import { Search, ShoppingBag, User, Menu, X, Heart, MessageCircle, LayoutDashboard, Headphones, Grid2X2 } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { useCart } from './cart-context'
 import { cn } from '@/lib/utils'
@@ -32,21 +32,25 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
   ]
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="hidden bg-brand-900 text-brand-100 sm:block">
+    <header className="store-header relative z-40 border-b border-line bg-white">
+      <div className="store-utility hidden sm:block">
         <div className="shell flex h-8 items-center justify-between text-xs">
           <span>Compramos, vendemos e trocamos · Luanda, Angola</span>
           <a href={waLink(supportMessage())} target="_blank" rel="noopener" className="inline-flex items-center gap-1.5 hover:text-white"><MessageCircle className="h-3.5 w-3.5" /> WhatsApp {WHATSAPP_DISPLAY}</a>
         </div>
       </div>
-      <div className="shell flex h-16 items-center gap-4">
+      <div className="store-header-main shell flex items-center gap-4">
         <button className="lg:hidden -ml-2 p-2 text-ink-soft" onClick={() => setOpen(true)} aria-label="Abrir menu"><Menu className="h-5 w-5" /></button>
-        <Logo />
-        <form onSubmit={submit} className="hidden flex-1 md:flex max-w-xl mx-auto">
+        <Logo className="[&>img]:h-14" />
+        <a href={waLink(supportMessage())} target="_blank" rel="noopener" className="ml-auto hidden shrink-0 items-center gap-3 xl:flex">
+          <Headphones className="h-8 w-8 text-ink-muted" strokeWidth={1} /><span><span className="block text-[10px] text-ink-muted">Atendimento ao cliente</span><strong className="text-xs">{WHATSAPP_DISPLAY}</strong></span>
+        </a>
+        <form onSubmit={submit} role="search" className="store-search hidden flex-1 md:flex max-w-md mx-auto">
           <div className="relative w-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar iPhone, Samsung, PlayStation, capas…" className="h-10 w-full rounded-md border border-line bg-surface pl-9 pr-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500" />
+            <input aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="O que procuras hoje?" className="h-9 w-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-brand-500/30" />
           </div>
+          <button type="submit" aria-label="Pesquisar"><Search className="h-4 w-4" /></button>
         </form>
         <div className="ml-auto flex items-center gap-1">
           <Link href="/loja" className="md:hidden p-2 text-ink-soft hover:text-ink" aria-label="Procurar"><Search className="h-5 w-5" /></Link>
@@ -64,9 +68,10 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
           </Link>
         </div>
       </div>
-      <nav className="hidden border-t border-line lg:block">
-        <div className="shell flex h-11 items-center gap-6 text-sm">
-          {nav.map((n) => (
+      <nav className="store-nav hidden lg:block">
+        <div className="store-nav-inner shell flex items-center text-sm">
+          <Link href="/loja" className="store-nav-categories"><Grid2X2 className="h-4 w-4" /> Comprar por categoria</Link>
+          {[{ href: '/', label: 'Início' }, { href: '/loja', label: 'Loja' }, { href: '/loja?ordem=recent', label: 'Novidades' }, { href: '/loja?promo=1', label: 'Promoções' }, ...nav.slice(-3)].map((n) => (
             <Link key={n.href} href={n.href} className={cn('font-medium transition-colors', pathname === n.href ? 'text-brand-700' : 'text-ink-soft hover:text-ink')}>{n.label}</Link>
           ))}
         </div>
@@ -81,7 +86,7 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
               <button onClick={() => setOpen(false)} className="p-2 text-ink-soft" aria-label="Fechar"><X className="h-5 w-5" /></button>
             </div>
             <form onSubmit={submit} className="p-4 border-b border-line">
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar produtos…" className="h-10 w-full rounded-md border border-line bg-surface px-3 text-sm" />
+              <input aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar produtos…" className="h-10 w-full rounded-md border border-line bg-surface px-3 text-sm" />
             </form>
             <div className="flex-1 overflow-y-auto p-2">
               {nav.map((n) => (

@@ -46,6 +46,7 @@ export const getBrands = cache(async () => {
 export type ProductFilters = {
   q?: string
   category?: string
+  categories?: string[]
   brand?: string
   condition?: string
   min?: number
@@ -68,6 +69,7 @@ export async function getProducts(f: ProductFilters = {}) {
     q = q.or(`name.ilike.%${term}%,model.ilike.%${term}%,brand_name.ilike.%${term}%,sku.ilike.%${term}%,description.ilike.%${term}%`)
   }
   if (f.category) q = q.eq('category_slug', f.category)
+  if (f.categories?.length) q = q.in('category_slug', f.categories)
   if (f.brand) q = q.eq('brand_slug', f.brand)
   if (f.condition) q = q.eq('condition', f.condition as Database['public']['Enums']['product_condition'])
   if (f.min != null) q = q.gte('price', f.min)
@@ -104,4 +106,3 @@ export const getBanners = cache(async () => {
   const { data } = await supabase.from('banners').select('*').eq('is_active', true).order('sort_order')
   return data ?? []
 })
-
