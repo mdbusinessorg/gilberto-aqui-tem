@@ -20,7 +20,18 @@ export function ProductRowActions({ product, images, categories, brands }: { pro
     if (loading) return
     setLoading(true)
     try {
-      const { error } = await createClient().from('products').delete().eq('id', product.id).select('id').single()
+      const supabase = createClient()
+      const [stock, movements] = await Promise.all([
+        supabase.from('inventory').select('quantity').eq('product_id', product.id).gt('quantity', 0).limit(1),
+        supabase.from('inventory_movements').select('id').eq('product_id', product.id).limit(1),
+      ])
+      if (stock.error || movements.error) throw new Error('Não foi possível consultar o inventário.')
+      if (product.stock_total > 0 || stock.data.length || movements.data.length) {
+        toast.error('Produto com stock ou histórico', 'Usa Desactivar para retirar da loja e manter o controlo do armazém.')
+        setConfirmDelete(false)
+        return
+      }
+      const { error } = await supabase.from('products').delete().eq('id', product.id).select('id').single()
       if (error) throw error
       toast.success('Produto removido')
       setConfirmDelete(false)
