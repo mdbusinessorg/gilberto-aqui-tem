@@ -6,30 +6,39 @@ import { Button, Field, Input, Select, Textarea, Card, CardHeader, CardBody } fr
 import { useToast } from '@/components/ui/toast'
 import { createClient } from '@/lib/supabase/client'
 import { waLink, supportMessage } from '@/lib/whatsapp'
+import { PhotoUpload } from '@/components/ui/photo-upload'
 
 export default function TradePage() {
   const toast = useToast()
   const router = useRouter()
   const [loading, setLoading] = React.useState(false)
   const [done, setDone] = React.useState(false)
+  const [photos, setPhotos] = React.useState<string[]>([])
+  const [uploading, setUploading] = React.useState(false)
   const [f, setF] = React.useState({ name: '', phone: '', brand: '', model: '', storage: '', condition: 'usado', battery: '', accessories: '', expected: '', notes: '' })
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }))
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading || uploading) return
     if (!f.name.trim() || !f.phone.trim() || !f.brand.trim() || !f.model.trim()) { toast.error('Preenche nome, telefone, marca e modelo'); return }
     setLoading(true)
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase.from('trade_requests').insert({
-      name: f.name, phone: f.phone, brand: f.brand, model: f.model, storage: f.storage || null,
-      condition: f.condition, battery_health: f.battery ? Number(f.battery) : null,
-      accessories: f.accessories || null, expected_value: f.expected ? Number(f.expected) : null,
-      notes: f.notes || null, profile_id: user?.id ?? null,
-    } as never)
-    setLoading(false)
-    if (error) toast.error('Não foi possível enviar', error.message)
-    else setDone(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase.from('trade_requests').insert({
+        name: f.name, phone: f.phone, brand: f.brand, model: f.model, storage: f.storage || null,
+        condition: f.condition, battery_health: f.battery ? Number(f.battery) : null,
+        accessories: f.accessories || null, expected_value: f.expected ? Number(f.expected) : null,
+        notes: f.notes || null, profile_id: user?.id ?? null, photos,
+      })
+      if (error) { toast.error('Não foi possível enviar', error.message); return }
+      setDone(true)
+    } catch {
+      toast.error('Não foi possível enviar', 'Verifica a ligação à internet e tenta novamente. As fotografias foram mantidas.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (done)
@@ -72,8 +81,10 @@ export default function TradePage() {
             <Field label="Acessórios incluídos"><Input value={f.accessories} onChange={(e) => set('accessories', e.target.value)} placeholder="Caixa, carregador…" /></Field>
             <Field label="Valor esperado (Kz)"><Input type="number" min={0} value={f.expected} onChange={(e) => set('expected', e.target.value)} /></Field>
             <Field label="Observações" className="sm:col-span-2"><Textarea value={f.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Defeitos, histórico, o que queres em troca…" /></Field>
+            <div className="sm:col-span-2"><PhotoUpload bucket="trade-ins" photos={photos} onChange={setPhotos}
+              uploading={uploading} onUploadingChange={setUploading} disabled={loading} /></div>
             <div className="sm:col-span-2">
-              <Button type="submit" size="lg" loading={loading} className="w-full sm:w-auto">Enviar para avaliação</Button>
+              <Button type="submit" size="lg" loading={loading || uploading} className="w-full sm:w-auto">Enviar para avaliação</Button>
               <p className="mt-3 text-xs text-ink-muted">Respondemos normalmente no mesmo dia útil por WhatsApp.</p>
             </div>
           </form>
