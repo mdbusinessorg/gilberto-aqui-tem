@@ -7,16 +7,22 @@ import { useToast } from '@/components/ui/toast'
 import { createClient } from '@/lib/supabase/client'
 import { slugify } from '@/lib/utils'
 import type { Database } from '@/lib/supabase/database.types'
+import { PhotoUpload } from '@/components/ui/photo-upload'
 
 type Cat = { id: string; name: string }
 type Product = Database['public']['Tables']['products']['Row']
+type ProductImage = Database['public']['Tables']['product_images']['Row']
 
-export function ProductForm({ categories, brands, product }: { categories: Cat[]; brands: Cat[]; product?: Product }) {
+export function ProductForm({ categories, brands, product, images = [] }: { categories: Cat[]; brands: Cat[]; product?: Product; images?: ProductImage[] }) {
   const [open, setOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
+  const [uploading, setUploading] = React.useState(false)
+  const [photos, setPhotos] = React.useState(images.map((image) => image.url))
+  const savedId = React.useRef(product?.id)
+  const imageIds = React.useRef(new Map(images.map((image) => [image.url, image.id])))
   const toast = useToast()
   const router = useRouter()
-  const [f, setF] = React.useState({
+  const initialForm = {
     name: product?.name ?? '', sku: product?.sku ?? '', price: product?.price?.toString() ?? '',
     promo_price: product?.promo_price?.toString() ?? '', cost_price: product?.cost_price?.toString() ?? '',
     category_id: product?.category_id ?? '', brand_id: product?.brand_id ?? '',
@@ -26,12 +32,16 @@ export function ProductForm({ categories, brands, product }: { categories: Cat[]
     model: product?.model ?? '', description: product?.description ?? '',
     featured: product?.is_featured ?? false, promo: product?.is_promo ?? false, active: product?.is_active ?? true,
     image_url: '',
-  })
+  }
+  const [f, setF] = React.useState(initialForm)
   const set = (k: string, v: unknown) => setF((p) => ({ ...p, [k]: v }))
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading || uploading) return
     if (!f.name.trim() || !f.price) { toast.error('Nome e preço são obrigatórios'); return }
+    const urls = Array.from(new Set([...photos, ...(f.image_url.trim() ? [f.image_url.trim()] : [])]))
+    if (urls.length > 6) { toast.error('Podes adicionar até 6 fotografias'); return }
     setLoading(true)
     const supabase = createClient()
     const sku = f.sku.trim() || `GAT-${Date.now().toString(36).toUpperCase()}`
@@ -46,15 +56,40 @@ export function ProductForm({ categories, brands, product }: { categories: Cat[]
       model: f.model || null, description: f.description || null,
       is_featured: f.featured, is_promo: f.promo, is_active: f.active,
     }
-    const { data, error } = product
-      ? await supabase.from('products').update(row as never).eq('id', product.id).select('id').single()
-      : await supabase.from('products').insert(row as never).select('id').single()
-    if (!error && data && f.image_url) {
-      await supabase.from('product_images').insert({ product_id: data.id, url: f.image_url, is_primary: true } as never)
+    try {
+      const { data, error } = savedId.current
+        ? await supabase.from('products').update(row as never).eq('id', savedId.current).select('id').single()
+        : await supabase.from('products').insert(row as never).select('id').single()
+      if (error) throw error
+      savedId.current = data.id
+      if (urls.length) {
+        const rows = urls.map((url, index) => {
+          const id = imageIds.current.get(url) ?? crypto.randomUUID()
+          imageIds.current.set(url, id)
+          return { id, product_id: data.id, url, alt: f.name.trim(), is_primary: index === 0, sort_order: index }
+        })
+        const { error: imageError } = await supabase.from('product_images').upsert(rows).select('id')
+        if (imageError) throw imageError
+      }
+      const removed = Array.from(imageIds.current).filter(([url]) => !urls.includes(url))
+      if (removed.length) {
+        const { data: deleted, error: deleteError } = await supabase.from('product_images').delete()
+          .eq('product_id', data.id).in('id', removed.map(([, id]) => id)).select('id')
+        if (deleteError) throw deleteError
+        if (deleted.length !== removed.length) throw new Error('Sem permissão para remover fotografias.')
+        removed.forEach(([url]) => imageIds.current.delete(url))
+      }
+      toast.success(product ? 'Produto actualizado' : 'Produto criado')
+      setPhotos(product ? urls : [])
+      setF(product ? { ...f, image_url: '' } : initialForm)
+      if (!product) { savedId.current = undefined; imageIds.current.clear() }
+      setOpen(false)
+      router.refresh()
+    } catch (error) {
+      toast.error('Não foi possível guardar tudo', error instanceof Error ? error.message : 'Tenta guardar novamente. O produto não será duplicado.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
-    if (error) toast.error('Erro ao guardar', error.message)
-    else { toast.success(product ? 'Produto actualizado' : 'Produto criado'); setOpen(false); router.refresh() }
   }
 
   return (
@@ -62,7 +97,7 @@ export function ProductForm({ categories, brands, product }: { categories: Cat[]
       {product
         ? <Button size="sm" variant="outline" onClick={() => setOpen(true)}>Editar</Button>
         : <Button onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Novo produto</Button>}
-      <Modal open={open} onClose={() => setOpen(false)} title={product ? `Editar ${product.name}` : 'Novo produto'} size="lg">
+      <Modal open={open} onClose={() => { if (!loading && !uploading) setOpen(false) }} title={product ? `Editar ${product.name}` : 'Novo produto'} size="lg">
         <form onSubmit={submit} className="grid gap-4 sm:grid-cols-2">
           <Field label="Nome" required className="sm:col-span-2"><Input value={f.name} onChange={(e) => set('name', e.target.value)} required /></Field>
           <Field label="SKU"><Input value={f.sku} onChange={(e) => set('sku', e.target.value)} placeholder="Auto se vazio" /></Field>
@@ -80,7 +115,9 @@ export function ProductForm({ categories, brands, product }: { categories: Cat[]
           <Field label="RAM"><Input value={f.ram} onChange={(e) => set('ram', e.target.value)} placeholder="8 GB" /></Field>
           <Field label="Bateria (%)"><Input type="number" min={0} max={100} value={f.battery} onChange={(e) => set('battery', e.target.value)} /></Field>
           <Field label="Garantia (meses)"><Input type="number" min={0} value={f.warranty} onChange={(e) => set('warranty', e.target.value)} /></Field>
-          <Field label="URL da imagem" className="sm:col-span-2"><Input value={f.image_url} onChange={(e) => set('image_url', e.target.value)} placeholder="https://… (upload via Supabase Storage em breve)" /></Field>
+          <div className="sm:col-span-2"><PhotoUpload bucket="products" photos={photos} onChange={setPhotos}
+            uploading={uploading} onUploadingChange={setUploading} disabled={loading} /></div>
+          <Field label="Ou adicionar por URL (opcional)" className="sm:col-span-2"><Input type="url" value={f.image_url} onChange={(e) => set('image_url', e.target.value)} placeholder="https://…" /></Field>
           <Field label="Descrição" className="sm:col-span-2"><Textarea value={f.description} onChange={(e) => set('description', e.target.value)} /></Field>
           <div className="flex flex-wrap gap-5 sm:col-span-2">
             <Checkbox label="Activo na loja" checked={f.active} onChange={(e) => set('active', e.target.checked)} />
@@ -88,8 +125,8 @@ export function ProductForm({ categories, brands, product }: { categories: Cat[]
             <Checkbox label="Em promoção" checked={f.promo} onChange={(e) => set('promo', e.target.checked)} />
           </div>
           <div className="flex justify-end gap-2 sm:col-span-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button type="submit" loading={loading}>{product ? 'Guardar' : 'Criar produto'}</Button>
+            <Button type="button" variant="outline" disabled={loading || uploading} onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button type="submit" loading={loading || uploading}>{product ? 'Guardar' : 'Criar produto'}</Button>
           </div>
         </form>
       </Modal>
