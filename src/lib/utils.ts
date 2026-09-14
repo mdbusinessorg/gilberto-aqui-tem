@@ -12,7 +12,7 @@ export function formatKz(value: number | string | null | undefined, opts: { comp
   if (opts.compact && Math.abs(n) >= 1_000_000) {
     return `${(n / 1_000_000).toLocaleString('pt-PT', { maximumFractionDigits: 1 })}M Kz`
   }
-  return `${n.toLocaleString('pt-PT', { maximumFractionDigits: 0 })} Kz`
+  return `${n.toLocaleString('pt-PT', { maximumFractionDigits: 0 }).replace(/[\s\u00a0\u202f]/g, '.')} Kz`
 }
 
 export function formatNumber(value: number | string | null | undefined) {

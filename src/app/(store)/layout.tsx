@@ -12,7 +12,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const user = session.profile ? { name: session.profile.full_name, isStaff: STAFF_ROLES.includes(session.profile.role) } : null
   return (
     <CartProvider>
-      <div className="flex min-h-screen flex-col">
+      <div className="storefront flex min-h-screen flex-col">
         <StoreHeader categories={nav} user={user} />
         <main className="flex-1">{children}</main>
         <StoreFooter categories={nav} settings={settings.store} />

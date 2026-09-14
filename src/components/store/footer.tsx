@@ -7,7 +7,7 @@ import type { NavCategory } from './header'
 
 export function StoreFooter({ categories, settings }: { categories: NavCategory[]; settings: { address?: string; hours?: string; instagram?: string; facebook?: string } }) {
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="store-footer mt-10 border-t border-line bg-white">
       <NewsletterBar />
       <div className="shell grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
