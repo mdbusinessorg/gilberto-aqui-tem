@@ -1,6 +1,7 @@
 'use client'
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Button, Modal, Field, Input, Select, Textarea, Checkbox } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
@@ -26,7 +27,7 @@ export function ProductForm({ categories, brands, product, images = [] }: { cate
     name: product?.name ?? '', sku: product?.sku ?? '', price: product?.price?.toString() ?? '',
     promo_price: product?.promo_price?.toString() ?? '', cost_price: product?.cost_price?.toString() ?? '',
     category_id: product?.category_id ?? '', brand_id: product?.brand_id ?? '',
-    condition: product?.condition ?? 'novo', stock: product?.stock_total?.toString() ?? '0', min_stock: product?.min_stock?.toString() ?? '1',
+    condition: product?.condition ?? 'novo', min_stock: product?.min_stock?.toString() ?? '1',
     color: product?.color ?? '', storage: product?.storage ?? '', ram: product?.ram ?? '',
     battery: product?.battery_health?.toString() ?? '', warranty: product?.warranty_months?.toString() ?? '',
     model: product?.model ?? '', description: product?.description ?? '',
@@ -50,7 +51,7 @@ export function ProductForm({ categories, brands, product, images = [] }: { cate
       price: Number(f.price), promo_price: f.promo_price ? Number(f.promo_price) : null,
       cost_price: f.cost_price ? Number(f.cost_price) : null,
       category_id: f.category_id || null, brand_id: f.brand_id || null,
-      condition: f.condition, stock_total: Number(f.stock || 0), min_stock: Number(f.min_stock || 1),
+      condition: f.condition, min_stock: Number(f.min_stock || 1),
       color: f.color || null, storage: f.storage || null, ram: f.ram || null,
       battery_health: f.battery ? Number(f.battery) : null, warranty_months: f.warranty ? Number(f.warranty) : null,
       model: f.model || null, description: f.description || null,
@@ -108,7 +109,9 @@ export function ProductForm({ categories, brands, product, images = [] }: { cate
           <Field label="Condição"><Select value={f.condition} onChange={(e) => set('condition', e.target.value)}><option value="novo">Novo</option><option value="recondicionado">Recondicionado</option><option value="usado">Usado</option></Select></Field>
           <Field label="Categoria"><Select value={f.category_id} onChange={(e) => set('category_id', e.target.value)}><option value="">—</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</Select></Field>
           <Field label="Marca"><Select value={f.brand_id} onChange={(e) => set('brand_id', e.target.value)}><option value="">—</option>{brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</Select></Field>
-          <Field label="Stock inicial"><Input type="number" min={0} value={f.stock} onChange={(e) => set('stock', e.target.value)} /></Field>
+          <div><Field label="Stock disponível (calculado pelo armazém)"><Input type="number" readOnly value={product?.stock_total ?? 0} /></Field>
+            <p className="mt-1 text-xs text-ink-muted">Depois de guardar o produto, regista a entrada e a localização no <Link href="/admin/armazem" className="text-brand-600 underline">Armazém virtual</Link>.</p>
+          </div>
           <Field label="Stock mínimo"><Input type="number" min={0} value={f.min_stock} onChange={(e) => set('min_stock', e.target.value)} /></Field>
           <Field label="Cor"><Input value={f.color} onChange={(e) => set('color', e.target.value)} /></Field>
           <Field label="Armazenamento"><Input value={f.storage} onChange={(e) => set('storage', e.target.value)} placeholder="128 GB" /></Field>
