@@ -59,7 +59,8 @@ export default function CheckoutPage() {
         <h1 className="mt-4 text-2xl font-semibold">Pedido recebido!</h1>
         <p className="mt-2 text-ink-muted">O teu pedido <strong className="text-ink">{done.number}</strong> foi criado com total de <strong className="text-ink">{formatKz(done.total)}</strong>. Vamos contactar-te para confirmar.</p>
         <div className="mt-6 flex justify-center gap-3">
-          <ButtonLink href={`/pedido?n=${done.number}&t=${encodeURIComponent(form.phone)}`}>Acompanhar pedido</ButtonLink>
+          <ButtonLink href={`/fatura?n=${done.number}&t=${encodeURIComponent(form.phone)}`}>Ver fatura</ButtonLink>
+          <ButtonLink href={`/pedido?n=${done.number}&t=${encodeURIComponent(form.phone)}`} variant="outline">Acompanhar pedido</ButtonLink>
           <ButtonLink href="/loja" variant="outline">Continuar a comprar</ButtonLink>
         </div>
       </div>
