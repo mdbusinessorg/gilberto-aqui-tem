@@ -1,14 +1,13 @@
 'use client'
 import * as React from 'react'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import Link from '@/components/ui/navigation-link'
+import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { Button, Field, Input, Card, CardBody } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { createClient } from '@/lib/supabase/client'
 
 function LoginForm() {
-  const router = useRouter()
   const params = useSearchParams()
   const toast = useToast()
   const [loading, setLoading] = React.useState(false)
@@ -21,8 +20,8 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password })
     setLoading(false)
     if (error) { toast.error('Não foi possível entrar', 'Verifica o email e a palavra-passe.'); return }
-    router.push(params.get('next') || '/conta')
-    router.refresh()
+    const next = new URL(params.get('next') || '/conta', window.location.origin)
+    window.location.assign(next.origin === window.location.origin ? next.href : '/conta')
   }
 
   return (

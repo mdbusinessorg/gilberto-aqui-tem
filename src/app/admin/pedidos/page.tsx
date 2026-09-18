@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader, Card, Table, THead, TBody, StatusBadge, EmptyState, Input, Select, Button } from '@/components/ui'
 import { formatKz, formatDateTime } from '@/lib/utils'

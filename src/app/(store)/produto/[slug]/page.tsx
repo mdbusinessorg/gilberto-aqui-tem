@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
 import { ShieldCheck, BadgeCheck } from 'lucide-react'
 import { getProductBySlug }  from '@/lib/store/queries'

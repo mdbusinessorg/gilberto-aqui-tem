@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { Plus } from 'lucide-react'
 import { Button, Modal, Field, Input, Select, Textarea, Checkbox } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'

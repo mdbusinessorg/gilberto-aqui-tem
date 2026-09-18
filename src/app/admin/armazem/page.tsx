@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight, Package, Warehouse } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'

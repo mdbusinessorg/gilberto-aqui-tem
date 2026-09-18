@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { TrendingUp, ShoppingCart, Package, AlertTriangle, Users, RefreshCw, Star, ListTodo } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { StatCard, PageHeader, Card, CardHeader, CardBody, StatusBadge, EmptyState } from '@/components/ui'

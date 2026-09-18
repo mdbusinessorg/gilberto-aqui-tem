@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
 import { Trash2, Minus, Plus, ShoppingBag, MessageCircle, ArrowRight } from 'lucide-react'
 import { useCart } from '@/components/store/cart-context'

@@ -3,7 +3,7 @@ import * as React from 'react'
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { PackageSearch, CheckCircle2 } from 'lucide-react'
-import { Button, Field, Input, Card, CardBody, StatusBadge } from '@/components/ui'
+import { Button, ButtonLink, Field, Input, Card, CardBody, StatusBadge } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
 import { formatKz, formatDateTime } from '@/lib/utils'
 import { ORDER_STATUS } from '@/lib/labels'
@@ -11,7 +11,7 @@ import type { OrderStatus } from '@/lib/labels'
 
 type Lookup = {
   order_number: string; status: OrderStatus; total: number; created_at: string
-  items?: { product_name: string; quantity: number; unit_price: number }[]
+  items?: { name: string; quantity: number; unit_price: number }[]
   history?: { status: OrderStatus; note: string | null; created_at: string }[]
 }
 
@@ -64,10 +64,11 @@ function LookupInner() {
             </div>
             {res.items && res.items.length > 0 && (
               <ul className="mt-4 space-y-1.5 text-sm">
-                {res.items.map((i, idx) => <li key={idx} className="flex justify-between"><span>{i.product_name} ×{i.quantity}</span><span className="tabular">{formatKz(i.unit_price * i.quantity)}</span></li>)}
+                {res.items.map((i, idx) => <li key={idx} className="flex justify-between"><span>{i.name} ×{i.quantity}</span><span className="tabular">{formatKz(i.unit_price * i.quantity)}</span></li>)}
               </ul>
             )}
             <p className="mt-3 flex justify-between border-t border-line pt-3 font-semibold"><span>Total</span><span className="tabular">{formatKz(res.total)}</span></p>
+            <ButtonLink href={`/fatura?n=${encodeURIComponent(res.order_number)}&t=${encodeURIComponent(t)}`} variant="outline" className="mt-4">Ver fatura para a loja</ButtonLink>
             {res.history && res.history.length > 0 && (
               <div className="mt-4 border-t border-line pt-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Histórico</p>

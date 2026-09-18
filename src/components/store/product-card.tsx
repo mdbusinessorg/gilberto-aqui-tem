@@ -1,5 +1,5 @@
 'use client'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
 import { Smartphone, ShoppingBag, Check } from 'lucide-react'
 import { Badge, Stars } from '@/components/ui'

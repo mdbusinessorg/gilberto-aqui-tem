@@ -19,6 +19,16 @@
 .recharts-cartesian-axis-tick text { fill: #6B7280; font-size: 11px; }
 .recharts-tooltip-wrapper { outline: none; }
 
+.admin-workspace .ui-card { border-color: #e9edea; border-radius: 14px; box-shadow: none; }
+.admin-workspace .page-heading h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 500; letter-spacing: -.04em; }
+.admin-workspace .page-heading p { color: #78817d; }
+.admin-workspace .page-heading button { border-radius: 24px; }
+.admin-workspace .page-heading button.bg-brand-600 { background: #17543c; }
+.admin-workspace .admin-nav a { min-height: 40px; border-radius: 9px; }
+.admin-workspace thead { background: #f7f9f7; }
+.admin-workspace .admin-topbar summary::-webkit-details-marker { display: none; }
+.admin-workspace a:focus-visible, .admin-workspace summary:focus-visible { outline: 2px solid #469d71; outline-offset: 3px; }
+
 .storefront .shell { max-width: 1200px; }
 .store-header { border-top: 3px solid #27a9ed; }
 .store-header .store-utility { background: #f5f5f5; color: #6b7280; }
@@ -194,4 +204,107 @@
   .home-iphone-banner > span > strong { font-size: 23px; }
   .home-iphone-banner > span > span { max-width: 140px; font-size: 11px; }
   .home-brands { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 35px 0; }
+}
+
+/* Homepage iOS (fundo branco, letras pretas, azul de destaque) */
+.ios-home { background: #ffffff; color: #111; padding: 16px 0 56px; }
+.ios-home .shell { max-width: 1100px; }
+.ios-section { margin-top: 28px; }
+.ios-heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.ios-heading h2 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; color: #111; }
+.ios-heading a { font-size: 12px; font-weight: 500; color: #1546b8; }
+.ios-hero { position: relative; overflow: hidden; height: 300px; border-radius: 22px; background: #111; color: white; }
+.ios-hero-image { object-fit: contain; object-position: 90% center; opacity: .95; }
+.ios-hero-copy { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; height: 100%; max-width: 50%; padding: 28px; justify-content: center; }
+.ios-hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: #b3ccff; }
+.ios-hero h1 { font-size: clamp(26px, 4vw, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+.ios-hero-copy > p:not(.ios-hero-eyebrow) { font-size: 13px; color: #d4d4d8; }
+.ios-pill { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; border-radius: 999px; padding: 10px 18px; background: #1546b8; color: white; font-size: 12px; font-weight: 600; }
+.ios-pill:hover { background: #103693; }
+.ios-hero-deal { position: absolute; right: 16px; bottom: 16px; z-index: 1; max-width: 200px; border-radius: 14px; background: rgba(255,255,255,.92); padding: 10px 14px; font-size: 11px; color: #111; line-height: 1.35; }
+.ios-hero-deal span { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #1546b8; }
+.ios-hero-deal strong { display: block; font-size: 15px; }
+.ios-chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.ios-chips::-webkit-scrollbar { display: none; }
+.ios-chip { display: inline-flex; flex-shrink: 0; align-items: center; gap: 8px; border-radius: 999px; background: #f4f5f7; padding: 6px 14px 6px 6px; font-size: 12px; font-weight: 500; color: #111; }
+.ios-chip:hover { background: #e8eefc; }
+.ios-chip span { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #1546b8; color: white; }
+.ios-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ios-home .product-card { border: 0; border-radius: 18px; overflow: hidden; background: #f4f5f7; color: #111; }
+.ios-home .product-card:hover { background: #eceef2; }
+.ios-home .product-card-image { aspect-ratio: 1; margin: 8px; border-radius: 14px; overflow: hidden; background: white; }
+.ios-home .product-card-body { padding: 6px 14px 14px; }
+.ios-home .product-card h3 { font-size: 14px; font-weight: 600; }
+.ios-home .product-card-brand { display: none; }
+.ios-home .product-card-detail { font-size: 11px; color: #6b7280; }
+.ios-home .product-card-price p:first-child { font-size: 15px; font-weight: 700; color: #1546b8; }
+.ios-home .product-card-stock { display: none; }
+.ios-home .product-card button { border-radius: 50%; border: 0; background: white; box-shadow: 0 1px 4px rgba(0,0,0,.12); opacity: 1; }
+.ios-services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ios-service { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 18px; background: #f4f5f7; }
+.ios-service > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #1546b8; color: white; flex-shrink: 0; }
+.ios-service strong { display: block; font-size: 13px; }
+.ios-service p { font-size: 11px; color: #6b7280; }
+.ios-brands { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; margin-top: 40px; font-size: 14px; font-weight: 700; color: #9ca3af; letter-spacing: -.02em; }
+.ios-brands a:hover { color: #111; }
+@media (max-width: 1023px) { .ios-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .ios-hero { height: 220px; border-radius: 18px; }
+  .ios-hero-copy { max-width: 60%; padding: 18px; }
+  .ios-hero-copy > p:not(.ios-hero-eyebrow) { display: none; }
+  .ios-hero-deal { display: none; }
+  .ios-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ios-home .product-card-body { padding: 4px 10px 12px; }
+  .ios-home .product-card h3 { font-size: 13px; }
+  .ios-services { grid-template-columns: 1fr; }
+}
+
+
+/* Fatura (estilo operadora) */
+.invoice { position: relative; background: white; color: #111; border: 1px solid #e5e8ef; border-radius: 12px; padding: 28px; font-size: 12px; line-height: 1.45; }
+.invoice-head { display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 24px; padding-bottom: 18px; border-bottom: 1px solid #e5e8ef; }
+.invoice-meta { justify-self: center; font-size: 11px; }
+.invoice-page { font-size: 11px; color: #6b7280; }
+.invoice-top { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 0; }
+.invoice h1 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.invoice dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; font-size: 11px; }
+.invoice dt { color: #6b7280; }
+.invoice-address { padding-top: 32px; font-size: 11px; text-transform: uppercase; }
+.invoice-barcode { font-family: monospace; letter-spacing: .3em; font-size: 10px; color: #9ca3af; margin-bottom: 8px; }
+.invoice-strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
+.invoice-strip > div { padding: 8px 12px; border-radius: 4px; }
+.invoice-strip-title { background: #f3f4f6; display: flex; flex-direction: column; }
+.invoice-strip-title strong { font-size: 14px; }
+.invoice-strip-dark { background: #111; color: white; display: flex; flex-direction: column; }
+.invoice-strip-dark span { font-size: 10px; color: #d4d4d8; }
+.invoice-strip-dark strong { font-size: 15px; }
+.invoice-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+.invoice-table th { text-align: right; font-weight: 600; font-size: 10px; color: #6b7280; padding: 6px 8px; border-bottom: 1px solid #e5e8ef; }
+.invoice-table th:first-child, .invoice-table td:first-child { text-align: left; }
+.invoice-table td { text-align: right; padding: 6px 8px; border-bottom: 1px solid #f3f4f6; }
+.invoice-group td { font-weight: 700; padding-top: 12px; border-bottom: 0; }
+.invoice-total td { font-weight: 700; border-top: 2px solid #111; border-bottom: 0; }
+.invoice-extract { margin-top: 22px; border-top: 1px solid #e5e8ef; padding-top: 14px; }
+.invoice-extract h2 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.invoice-extract p { display: flex; justify-content: space-between; padding: 3px 0; }
+.invoice-extract-total { font-weight: 700; border-top: 2px solid #111; margin-top: 4px; }
+.invoice-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 22px; }
+.invoice-boxes > div { border: 1px solid #111; border-radius: 4px; padding: 10px 12px; font-size: 10.5px; }
+.invoice-boxes h3 { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.invoice-stamp { position: absolute; right: 36px; bottom: 96px; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 190px; padding: 12px 10px; border: 3px double #1546b8; border-radius: 10px; color: #1546b8; text-align: center; transform: rotate(-8deg); opacity: .9; background: rgba(255,255,255,.7); }
+.invoice-stamp strong { font-size: 12px; letter-spacing: .08em; }
+.invoice-stamp span { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+.invoice-stamp em { margin-top: 4px; font-style: normal; font-weight: 800; font-size: 11px; border: 2px solid #1546b8; border-radius: 4px; padding: 1px 8px; }
+.invoice-foot { margin-top: 28px; font-size: 9px; color: #9ca3af; text-align: center; }
+@media (max-width: 767px) {
+  .invoice { padding: 16px; }
+  .invoice-head, .invoice-top, .invoice-strip, .invoice-boxes { grid-template-columns: 1fr; }
+  .invoice-address { padding-top: 0; }
+  .invoice-stamp { position: static; transform: none; margin: 20px auto 0; }
+}
+@media print {
+  .store-header, .storefront > footer, .invoice-actions, .storefront > a.fixed, .storefront > div.fixed { display: none !important; }
+  body { background: white; }
+  .invoice { border: 0; padding: 0; }
+  .invoice-stamp { opacity: 1; }
 }

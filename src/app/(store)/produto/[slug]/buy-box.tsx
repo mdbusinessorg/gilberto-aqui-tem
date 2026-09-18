@@ -1,6 +1,5 @@
 'use client'
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
 import { Minus, Plus, ShoppingBag, MessageCircle, Heart } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
@@ -15,7 +14,6 @@ export function ProductBuyBox({ p }: { p: StorefrontProduct }) {
   const [saved, setSaved] = React.useState(false)
   const { add } = useCart()
   const toast = useToast()
-  const router = useRouter()
   const price = priceOf(p)
   const out = (p.stock_total ?? 0) <= 0
   const max = p.stock_total ?? 1
@@ -30,7 +28,7 @@ export function ProductBuyBox({ p }: { p: StorefrontProduct }) {
   const wishlist = async () => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/entrar?next=' + encodeURIComponent(`/produto/${p.slug}`)); return }
+    if (!user) { window.location.assign('/entrar?next=' + encodeURIComponent(`/produto/${p.slug}`)); return }
     const { error } = await supabase.from('wishlists').upsert({ profile_id: user.id, product_id: p.id! } as never)
     if (error) toast.error('Não foi possível guardar'); else { setSaved(true); toast.success('Guardado nos favoritos') }
   }
@@ -63,7 +61,7 @@ export function ProductBuyBox({ p }: { p: StorefrontProduct }) {
         </a>
       </div>
       {!out && (
-        <Button size="lg" variant="dark" className="w-full" onClick={() => addCart(() => router.push('/checkout'))}>
+        <Button size="lg" variant="dark" className="w-full" onClick={() => addCart(() => window.location.assign('/checkout'))}>
           Comprar agora
         </Button>
       )}
