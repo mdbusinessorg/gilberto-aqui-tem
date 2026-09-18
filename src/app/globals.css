@@ -205,3 +205,50 @@
   .home-iphone-banner > span > span { max-width: 140px; font-size: 11px; }
   .home-brands { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 35px 0; }
 }
+
+/* Homepage escura (referência mobile) */
+.dark-home { background: #0b0b0d; color: #f5f5f7; padding: 24px 0 56px; }
+.dark-home .shell { max-width: 1100px; }
+.dark-home h1, .dark-home h2 { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.dark-home-section { margin-top: 36px; }
+.dark-home-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.dark-home-heading a { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; color: #a1a1aa; }
+.dark-home-heading a:hover { color: white; }
+.dark-home-hero-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.dark-home-hero-card { display: grid; grid-template-rows: 1fr auto; min-height: 300px; overflow: hidden; border-radius: 20px; background: #ffffff; color: #111; }
+.dark-home-hero-secondary { background: #1c1c21; color: #f5f5f7; }
+.dark-home-hero-image { position: relative; min-height: 190px; }
+.dark-home-hero-copy { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px 20px; font-size: 13px; line-height: 1.45; }
+.dark-home-hero-copy strong { font-size: 15px; }
+.dark-home-button { flex-shrink: 0; border-radius: 999px; padding: 9px 20px; background: #111; color: white; font-size: 12px; font-weight: 600; }
+.dark-home-hero-secondary .dark-home-button { background: white; color: #111; }
+.dark-home-categories { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.dark-home-category { display: grid; place-items: center; gap: 10px; padding: 18px 8px; border-radius: 16px; background: #17171b; font-size: 12px; text-align: center; color: #e4e4e7; }
+.dark-home-category:hover { background: #222228; }
+.dark-home-category span { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 14px; background: #26262c; }
+.dark-home-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dark-home .product-card { border: 0; border-radius: 18px; overflow: hidden; background: #17171b; color: #f5f5f7; }
+.dark-home .product-card:hover { background: #1f1f25; }
+.dark-home .product-card-image { background: #26262c; }
+.dark-home .product-card h3, .dark-home .product-card-price p:first-child { color: #f5f5f7; }
+.dark-home .product-card-brand, .dark-home .product-card-detail, .dark-home .product-card-price p:last-child { color: #a1a1aa; }
+.dark-home .product-card-stock { display: none; }
+.dark-home .product-card button { border-radius: 999px; }
+.dark-home-services { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.dark-home-service { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; background: #17171b; }
+.dark-home-service > span { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #26262c; flex-shrink: 0; }
+.dark-home-service strong { display: block; font-size: 13px; }
+.dark-home-service p { font-size: 11px; color: #a1a1aa; }
+.dark-home-brands { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; margin-top: 40px; font-size: 14px; font-weight: 600; color: #71717a; letter-spacing: -.02em; }
+.dark-home-brands a:hover { color: white; }
+@media (max-width: 767px) {
+  .dark-home { padding-top: 16px; }
+  .dark-home-hero-row { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+  .dark-home-hero-card { flex: 0 0 82%; min-height: 250px; scroll-snap-align: start; }
+  .dark-home-hero-image { min-height: 150px; }
+  .dark-home-categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .dark-home-category { flex: 0 0 96px; padding: 14px 6px; font-size: 11px; }
+  .dark-home-category span { width: 52px; height: 52px; }
+  .dark-home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .dark-home-services { grid-template-columns: 1fr; }
+}
