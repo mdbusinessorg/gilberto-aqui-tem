@@ -1,6 +1,5 @@
 'use client'
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
 import { CheckCircle2, RefreshCw } from 'lucide-react'
 import { Button, Field, Input, Select, Textarea, Card, CardHeader, CardBody } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
@@ -10,7 +9,6 @@ import { PhotoUpload } from '@/components/ui/photo-upload'
 
 export default function TradePage() {
   const toast = useToast()
-  const router = useRouter()
   const [loading, setLoading] = React.useState(false)
   const [done, setDone] = React.useState(false)
   const [photos, setPhotos] = React.useState<string[]>([])
@@ -48,7 +46,7 @@ export default function TradePage() {
         <h1 className="mt-4 text-2xl font-semibold">Pedido de avaliação enviado</h1>
         <p className="mt-2 text-ink-muted">Vamos analisar o teu aparelho e responder por WhatsApp com a proposta de valor.</p>
         <div className="mt-6 flex justify-center gap-3">
-          <Button onClick={() => router.push('/loja')}>Ver a loja</Button>
+          <Button onClick={() => window.location.assign('/loja')}>Ver a loja</Button>
           <a href={waLink(supportMessage())} target="_blank" rel="noopener" className="inline-flex h-10 items-center rounded-md border border-line px-4 text-sm font-medium hover:bg-surface">WhatsApp</a>
         </div>
       </div>

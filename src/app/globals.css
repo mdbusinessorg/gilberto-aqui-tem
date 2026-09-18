@@ -19,6 +19,16 @@
 .recharts-cartesian-axis-tick text { fill: #6B7280; font-size: 11px; }
 .recharts-tooltip-wrapper { outline: none; }
 
+.admin-workspace .ui-card { border-color: #e9edea; border-radius: 14px; box-shadow: none; }
+.admin-workspace .page-heading h1 { font-size: clamp(24px, 3vw, 32px); font-weight: 500; letter-spacing: -.04em; }
+.admin-workspace .page-heading p { color: #78817d; }
+.admin-workspace .page-heading button { border-radius: 24px; }
+.admin-workspace .page-heading button.bg-brand-600 { background: #17543c; }
+.admin-workspace .admin-nav a { min-height: 40px; border-radius: 9px; }
+.admin-workspace thead { background: #f7f9f7; }
+.admin-workspace .admin-topbar summary::-webkit-details-marker { display: none; }
+.admin-workspace a:focus-visible, .admin-workspace summary:focus-visible { outline: 2px solid #469d71; outline-offset: 3px; }
+
 .storefront .shell { max-width: 1200px; }
 .store-header { border-top: 3px solid #27a9ed; }
 .store-header .store-utility { background: #f5f5f5; color: #6b7280; }

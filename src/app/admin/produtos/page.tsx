@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { Package } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getCategories, getBrands } from '@/lib/store/queries'

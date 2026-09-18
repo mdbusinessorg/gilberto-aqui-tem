@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { redirect } from 'next/navigation'
 import { Package, Heart, RefreshCw } from 'lucide-react'
 import { getSessionProfile, createClient } from '@/lib/supabase/server'

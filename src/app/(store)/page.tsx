@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
 import { ArrowRight, ChevronRight, MessageCircle, RefreshCw, ShieldCheck, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
 import { ProductCard } from '@/components/store/product-card'
