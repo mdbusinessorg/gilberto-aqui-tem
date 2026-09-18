@@ -7,12 +7,12 @@ import { useToast } from '@/components/ui/toast'
 import { createClient } from '@/lib/supabase/client'
 import { MOVEMENT_TYPES } from '@/lib/labels'
 
-export function MovementForm({ products, locations, inventory }: { products: { id: string; name: string; sku: string }[]; locations: { id: string; name: string }[]; inventory: { product_id: string; location_id: string; quantity: number }[] }) {
+export function MovementForm({ products, locations, inventory, defaultLocationId = '' }: { products: { id: string; name: string; sku: string }[]; locations: { id: string; name: string }[]; inventory: { product_id: string; location_id: string; quantity: number }[]; defaultLocationId?: string }) {
   const [open, setOpen] = React.useState(false)
   const [loading, setLoading] = React.useState(false)
   const toast = useToast()
   const router = useRouter()
-  const initialForm = { product_id: '', type: 'entrada', quantity: '1', location_id: '', to_location_id: '', reason: '', notes: '' }
+  const initialForm = { product_id: '', type: 'entrada', quantity: '1', location_id: defaultLocationId, to_location_id: '', reason: '', notes: '' }
   const [f, setF] = React.useState(initialForm)
   const currentStock = inventory.find((i) => i.product_id === f.product_id && i.location_id === f.location_id)?.quantity ?? 0
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }))
