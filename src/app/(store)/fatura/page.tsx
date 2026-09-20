@@ -23,6 +23,14 @@ function InvoiceInner() {
   const t = params.get('t') ?? ''
   const [inv, setInv] = React.useState<Invoice | null>(null)
   const [state, setState] = React.useState<'loading' | 'ok' | 'error'>('loading')
+  const [scale, setScale] = React.useState(1)
+  const A4_PX = 794
+
+  React.useEffect(() => {
+    const fit = () => setScale(Math.min(1, (window.innerWidth - 32) / A4_PX))
+    fit(); window.addEventListener('resize', fit)
+    return () => window.removeEventListener('resize', fit)
+  }, [])
 
   React.useEffect(() => {
     if (!n || !t) { setState('error'); return }
@@ -41,13 +49,14 @@ function InvoiceInner() {
   const ref = inv.order_number.replace(/\D/g, '').padStart(9, '0')
 
   return (
-    <div className="shell max-w-3xl py-8">
+    <div className="shell max-w-3xl overflow-hidden py-8">
       <div className="invoice-actions mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-ink-muted">Apresenta esta fatura na loja física para levantar ou pagar o teu pedido.</p>
         <Button onClick={() => window.print()}><Printer className="h-4 w-4" /> Imprimir / Guardar PDF</Button>
       </div>
 
-      <article className="invoice">
+      <div className="invoice-scale" style={{ transform: `scale(${scale})`, height: scale < 1 ? `${1123 * scale}px` : undefined }}>
+      <article className="invoice" style={{ width: A4_PX, maxWidth: 'none', minHeight: 1123 }}>
         <header className="invoice-head">
           <Image src="/brand/logo.png" alt="Gilberto Aqui Tem" width={190} height={90} className="h-14 w-auto object-contain" priority />
           <div className="invoice-meta">
@@ -121,6 +130,7 @@ function InvoiceInner() {
 
         <footer className="invoice-foot">Documento gerado electronicamente em gilberto-aqui-tem.netlify.app · Processado por programa informático</footer>
       </article>
+      </div>
     </div>
   )
 }
