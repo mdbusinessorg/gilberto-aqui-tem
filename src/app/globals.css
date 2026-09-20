@@ -422,3 +422,16 @@ a.dash-chip:hover { border-color: #1546b8; color: #1546b8; }
 .va-mic:disabled { background: #cbd5e1; box-shadow: none; }
 .va-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #e5e8ef; color: #374151; }
 @keyframes va-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,.45); } 50% { box-shadow: 0 0 0 12px rgba(220,38,38,0); } }
+/* Checkout */
+.co-steps { display: flex; gap: 6px; font-size: 12px; }
+.co-steps li { padding: 5px 12px; border-radius: 999px; background: #f3f4f6; color: #6b7280; }
+.co-steps li.done { background: #dcfce7; color: #15803d; }
+.co-steps li.active { background: #1546b8; color: #fff; }
+.co-card { border: 1px solid #e5e8ef; border-radius: 14px; padding: 20px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+.co-title { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+.co-title span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #1546b8; color: #fff; font-size: 12px; }
+.co-summary { height: fit-content; border: 1px solid #e5e8ef; border-radius: 14px; padding: 20px; background: #f8fafc; }
+.co-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; padding-top: 10px; border-top: 1px dashed #d1d5db; font-size: 17px; font-weight: 700; }
+.co-total span:last-child { color: #1546b8; }
+.co-trust { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 12px; font-size: 11px; color: #6b7280; }
+.sm-brands-side { margin-top: 14px; }

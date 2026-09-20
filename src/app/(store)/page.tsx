@@ -86,6 +86,10 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             </div>
           )}
 
+          <nav aria-label="Marcas" className="sm-brands sm-brands-side">
+            {brands.filter(b => ['apple', 'samsung', 'sony', 'dell', 'jbl', 'hp'].includes(b.slug)).map(b => <Link key={b.id} href={`/loja?marca=${b.slug}`}>{b.name}</Link>)}
+          </nav>
+
           <div className="sm-services">
             {[
               { icon: Truck, title: 'Entrega em Luanda', text: 'Combinada no WhatsApp', href: waLink(supportMessage()) },
@@ -136,10 +140,10 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             </Link>
           )}
 
-          {audio.products.length > 0 && (
+          {(misc.products.length > 0 || audio.products.length > 0) && (
             <section className="sm-section">
-              <div className="sm-heading"><h2>Áudio</h2><Link href="/categoria/audio">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{audio.products.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-heading"><h2>Diversos</h2><Link href="/loja">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{(misc.products.length ? misc.products : audio.products).slice(0, 4).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
             </section>
           )}
 
@@ -148,9 +152,6 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             {promoD && <Link href={`/produto/${promoD.slug}`} className="sm-banner"><div><small>Diversos</small><strong>{promoD.name}</strong><span>A partir de {formatKz(priceOf(promoD).final)}</span></div><div className="sm-banner-image"><ProductImage src={promoD.image_url} alt="" className="h-full w-full p-2" sizes="160px" /></div></Link>}
           </div>
 
-          <nav aria-label="Marcas" className="sm-brands">
-            {brands.filter(b => ['apple', 'samsung', 'sony', 'dell', 'jbl', 'hp'].includes(b.slug)).map(b => <Link key={b.id} href={`/loja?marca=${b.slug}`}>{b.name}</Link>)}
-          </nav>
         </main>
       </div>
     </div>
