@@ -21,7 +21,7 @@ export function ProductImage({ src, alt, className, sizes = '(max-width: 640px) 
   return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={cn('object-contain', className)} />
 }
 
-export function ProductCard({ p, compact, horizontal }: { p: StorefrontProduct; compact?: boolean; horizontal?: boolean }) {
+export function ProductCard({ p, compact, horizontal, actions }: { p: StorefrontProduct; compact?: boolean; horizontal?: boolean; actions?: boolean }) {
   const { add } = useCart()
   const toast = useToast()
   const price = priceOf(p)
@@ -34,11 +34,18 @@ export function ProductCard({ p, compact, horizontal }: { p: StorefrontProduct; 
     add({ id: p.id!, slug: p.slug!, name: p.name!, price: price.final, image: p.image_url, stock: p.stock_total ?? 0, sku: p.sku!, detail })
     toast.success('Adicionado ao carrinho', p.name ?? undefined)
   }
+  const buyNow = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (out) return
+    add({ id: p.id!, slug: p.slug!, name: p.name!, price: price.final, image: p.image_url, stock: p.stock_total ?? 0, sku: p.sku!, detail })
+    window.location.assign('/checkout')
+  }
 
   return (
     <Link href={`/produto/${p.slug}`} className={cn('product-card group flex flex-col border border-line bg-white transition-colors hover:border-brand-200', horizontal && 'product-card-horizontal')}>
       <div className="product-card-image relative aspect-square overflow-hidden">
         <ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-4" sizes={horizontal ? '(max-width: 640px) 30vw, 140px' : '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px'} />
+        {actions && p.category_name && <span className="product-card-tag">{p.category_name}</span>}
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1">
           {price.active && <Badge tone="red">-{price.discount}%</Badge>}
           {p.condition && p.condition !== 'novo' && <Badge tone="slate">{CONDITION[p.condition].label}</Badge>}
@@ -68,6 +75,12 @@ export function ProductCard({ p, compact, horizontal }: { p: StorefrontProduct; 
           {!out && (p.stock_total ?? 0) <= 3 && <span className="product-card-stock text-[11px] font-medium text-amber-600">Só {p.stock_total}</span>}
           {!out && (p.stock_total ?? 0) > 3 && <span className="product-card-stock inline-flex items-center gap-1 text-[11px] text-emerald-600"><Check className="h-3 w-3" /> Em stock</span>}
         </div>
+        {actions && !out && (
+          <div className="product-card-actions">
+            <button type="button" onClick={quickAdd}>Adicionar</button>
+            <button type="button" onClick={buyNow} className="primary">Comprar</button>
+          </div>
+        )}
       </div>
     </Link>
   )
