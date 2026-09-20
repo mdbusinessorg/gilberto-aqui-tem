@@ -4,11 +4,11 @@ import Link from '@/components/ui/navigation-link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ShoppingCart, Package, Warehouse, Users, RefreshCw, Star, UserCog,
-  ClipboardCheck, ListTodo, Truck, ShoppingBag, Tag, BarChart3, Bell, ScrollText, Settings, Store, Menu, X, LogOut, Search, ChevronDown, ArrowUpRight,
+  ClipboardCheck, ListTodo, Truck, ShoppingBag, Tag, BarChart3, Bell, ScrollText, Settings, Store, Menu, X, LogOut, Search, ChevronDown, ArrowUpRight, Sparkles,
 } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { cn } from '@/lib/utils'
-import { ROLE_LABELS, type UserRole } from '@/lib/labels'
+import { ROLE_LABELS, isAdminRole, type UserRole } from '@/lib/labels'
 import { Badge } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
 
@@ -52,7 +52,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
       {SECTIONS.map((s, i) => (
         <div key={i} className={i > 0 ? 'mt-5' : ''}>
           <p className="mb-2 px-3 text-[10px] uppercase tracking-[.15em] text-slate-400">{s.title ?? 'Menu principal'}</p>
-          {s.items.map((item) => (
+          {(i === 0 && isAdminRole(user.role) ? [{ href: '/admin/assistente', label: 'Assistente (voz)', icon: Sparkles }, ...s.items] : s.items).map((item) => (
             <Link key={item.href} href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}
               className={cn('mb-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-[13.5px] font-medium transition-colors',
                 isActive(item.href) ? 'bg-brand-600 text-white' : 'text-ink hover:bg-brand-50 hover:text-brand-700')}>

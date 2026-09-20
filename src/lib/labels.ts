@@ -155,3 +155,8 @@ export const NOTIFICATION_KINDS: Record<string, string> = {
 export function labelOf<T extends string>(map: Record<T, { label: string }>, key: T | null | undefined) {
   return key ? map[key]?.label ?? key : '—'
 }
+
+export const MANAGER_ROLES: UserRole[] = ['super_admin', 'admin', 'manager']
+export const ADMIN_ROLES: UserRole[] = ['super_admin', 'admin']
+export const isManagerRole = (r: UserRole) => MANAGER_ROLES.includes(r)
+export const isAdminRole = (r: UserRole) => ADMIN_ROLES.includes(r)
