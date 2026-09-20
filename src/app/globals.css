@@ -434,4 +434,4 @@ a.dash-chip:hover { border-color: #1546b8; color: #1546b8; }
 .co-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; padding-top: 10px; border-top: 1px dashed #d1d5db; font-size: 17px; font-weight: 700; }
 .co-total span:last-child { color: #1546b8; }
 .co-trust { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 12px; font-size: 11px; color: #6b7280; }
-.sm-brands-side { margin-top: 14px; }
+.sm-brands-side { margin-top: 0; padding: 14px 12px; border: 1px solid #e5e8ef; border-radius: 6px; font-size: 13px; gap: 8px 14px; justify-content: flex-start; }
