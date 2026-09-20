@@ -261,18 +261,20 @@
 
 
 /* Fatura (estilo operadora) */
-.invoice { position: relative; background: white; color: #111; border: 1px solid #e5e8ef; border-radius: 12px; padding: 28px; font-size: 12px; line-height: 1.45; }
+.invoice { position: relative; box-sizing: border-box; width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; display: flex; flex-direction: column; background: white; color: #111; border: 1px solid #e5e8ef; border-radius: 6px; padding: 18mm 16mm; font-size: 11.5px; line-height: 1.45; box-shadow: 0 8px 30px rgba(0,0,0,.06); }
+.invoice-foot { margin-top: auto; padding-top: 28px; }
 .invoice-head { display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 24px; padding-bottom: 18px; border-bottom: 1px solid #e5e8ef; }
 .invoice-meta { justify-self: center; font-size: 11px; }
 .invoice-page { font-size: 11px; color: #6b7280; }
 .invoice-top { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 0; }
 .invoice h1 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-.invoice dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; font-size: 11px; }
+.invoice dl { display: grid; grid-template-columns: 110px 1fr; gap: 3px 12px; font-size: 11px; }
+.invoice dd { font-weight: 500; }
 .invoice dt { color: #6b7280; }
 .invoice-address { padding-top: 32px; font-size: 11px; text-transform: uppercase; }
 .invoice-barcode { font-family: monospace; letter-spacing: .3em; font-size: 10px; color: #9ca3af; margin-bottom: 8px; }
 .invoice-strip { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 8px; }
-.invoice-strip > div { padding: 8px 12px; border-radius: 4px; }
+.invoice-strip > div { padding: 10px 14px; border-radius: 4px; min-height: 58px; justify-content: center; }
 .invoice-strip-title { background: #f3f4f6; display: flex; flex-direction: column; }
 .invoice-strip-title strong { font-size: 14px; }
 .invoice-strip-dark { background: #111; color: white; display: flex; flex-direction: column; }
@@ -281,7 +283,9 @@
 .invoice-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
 .invoice-table th { text-align: right; font-weight: 600; font-size: 10px; color: #6b7280; padding: 6px 8px; border-bottom: 1px solid #e5e8ef; }
 .invoice-table th:first-child, .invoice-table td:first-child { text-align: left; }
-.invoice-table td { text-align: right; padding: 6px 8px; border-bottom: 1px solid #f3f4f6; }
+.invoice-table td { text-align: right; padding: 8px; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
+.invoice-table td:first-child { white-space: normal; }
+.invoice-table th:not(:first-child), .invoice-table td:not(:first-child) { width: 18%; }
 .invoice-group td { font-weight: 700; padding-top: 12px; border-bottom: 0; }
 .invoice-total td { font-weight: 700; border-top: 2px solid #111; border-bottom: 0; }
 .invoice-extract { margin-top: 22px; border-top: 1px solid #e5e8ef; padding-top: 14px; }
@@ -291,20 +295,32 @@
 .invoice-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 22px; }
 .invoice-boxes > div { border: 1px solid #111; border-radius: 4px; padding: 10px 12px; font-size: 10.5px; }
 .invoice-boxes h3 { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
-.invoice-stamp { position: absolute; right: 36px; bottom: 96px; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 190px; padding: 12px 10px; border: 3px double #1546b8; border-radius: 10px; color: #1546b8; text-align: center; transform: rotate(-8deg); opacity: .9; background: rgba(255,255,255,.7); }
+.invoice-stamp { position: absolute; right: 22mm; bottom: 48mm; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 190px; padding: 12px 10px; border: 3px double #1546b8; border-radius: 10px; color: #1546b8; text-align: center; transform: rotate(-8deg); opacity: .9; background: rgba(255,255,255,.7); }
 .invoice-stamp strong { font-size: 12px; letter-spacing: .08em; }
 .invoice-stamp span { font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
 .invoice-stamp em { margin-top: 4px; font-style: normal; font-weight: 800; font-size: 11px; border: 2px solid #1546b8; border-radius: 4px; padding: 1px 8px; }
-.invoice-foot { margin-top: 28px; font-size: 9px; color: #9ca3af; text-align: center; }
+.invoice-foot { font-size: 9px; color: #9ca3af; text-align: center; border-top: 1px solid #e5e8ef; padding-top: 10px; }
 @media (max-width: 767px) {
-  .invoice { padding: 16px; }
+  .invoice { width: auto; min-height: 0; padding: 16px; }
   .invoice-head, .invoice-top, .invoice-strip, .invoice-boxes { grid-template-columns: 1fr; }
   .invoice-address { padding-top: 0; }
   .invoice-stamp { position: static; transform: none; margin: 20px auto 0; }
 }
 @media print {
   .store-header, .storefront > footer, .invoice-actions, .storefront > a.fixed, .storefront > div.fixed { display: none !important; }
+  @page { size: A4; margin: 0; }
   body { background: white; }
-  .invoice { border: 0; padding: 0; }
+  .shell { max-width: none !important; padding: 0 !important; }
+  .invoice { border: 0; border-radius: 0; box-shadow: none; width: 210mm; min-height: 297mm; padding: 16mm 14mm; }
   .invoice-stamp { opacity: 1; }
 }
+
+/* Dashboard (referência DealDeck) */
+.dash-card { background: white; border: 1px solid #e5e8ef; border-radius: 18px; padding: 18px 20px; }
+.dash-kpi { position: relative; background: white; border: 1px solid #e5e8ef; border-radius: 18px; padding: 18px 20px; color: #111; }
+.dash-kpi-primary { background: linear-gradient(135deg, #1546b8, #2f6fe4); color: white; border: 0; box-shadow: 0 12px 30px rgba(21,70,184,.28); }
+.dash-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: #f3f4f6; color: #111; }
+.dash-kpi-primary .dash-icon { background: rgba(255,255,255,.18); color: white; }
+.dash-delta { border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 600; background: #dcfce7; color: #15803d; }
+.dash-delta-neg { background: #fee2e2; color: #b91c1c; }
+.dash-chip { border: 1px solid #e5e8ef; border-radius: 999px; padding: 4px 10px; font-size: 11px; color: #374151; white-space: nowrap; }
