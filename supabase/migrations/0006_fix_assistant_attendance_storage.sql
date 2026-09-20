@@ -1,58 +1,14 @@
--- Ponto com fotografia, visibilidade do próprio ponto e contexto do assistente do administrador
-alter table public.attendance add column if not exists check_in_photo text;
-alter table public.attendance add column if not exists check_out_photo text;
-
-drop policy if exists "attendance: próprio" on public.attendance;
-create policy "attendance: próprio" on public.attendance for select
-  using (employee_id in (select id from public.employees where profile_id = auth.uid()));
-
-drop policy if exists "employees: próprio" on public.employees;
-create policy "employees: próprio" on public.employees for select using (profile_id = auth.uid());
-
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types) values
-  ('attendance', 'attendance', true, 5242880, array['image/jpeg','image/png','image/webp'])
-on conflict (id) do nothing;
+-- Fotos de ponto: qualquer utilizador autenticado com ficha de funcionário pode enviar/actualizar; leitura pública do bucket
 drop policy if exists "storage ponto envia" on storage.objects;
-create policy "storage ponto envia" on storage.objects for insert with check (bucket_id = 'attendance' and public.is_staff());
+create policy "storage ponto envia" on storage.objects for insert
+  with check (bucket_id = 'attendance' and exists (select 1 from public.employees where profile_id = auth.uid()));
+drop policy if exists "storage ponto actualiza" on storage.objects;
+create policy "storage ponto actualiza" on storage.objects for update
+  using (bucket_id = 'attendance' and exists (select 1 from public.employees where profile_id = auth.uid()));
+drop policy if exists "storage ponto ler" on storage.objects;
+create policy "storage ponto ler" on storage.objects for select using (bucket_id = 'attendance');
 
-create or replace function public.clock_in(p_device text default null, p_photo text default null) returns public.attendance
-language plpgsql security definer set search_path = public as $$
-declare e public.employees; v_now timestamptz := now(); v_local timestamp; v_late integer := 0; v_row public.attendance; v_status public.attendance_status;
-begin
-  select * into e from public.employees where profile_id = auth.uid() and status = 'activo';
-  if e is null then raise exception 'Não existe ficha de funcionário activa para este utilizador'; end if;
-  v_local := v_now at time zone 'Africa/Luanda';
-  v_late := greatest(0, (extract(epoch from (v_local::time - e.schedule_start)) / 60)::integer - e.late_tolerance_minutes);
-  v_status := case when v_late > 0 then 'atrasado' else 'presente' end;
-  insert into public.attendance (employee_id, work_date, check_in, status, late_minutes, device_info, recorded_by, check_in_photo)
-  values (e.id, v_local::date, v_now, v_status, v_late, p_device, auth.uid(), p_photo)
-  on conflict (employee_id, work_date) do update set check_in = coalesce(public.attendance.check_in, excluded.check_in),
-    check_in_photo = coalesce(public.attendance.check_in_photo, excluded.check_in_photo)
-  returning * into v_row;
-  if v_late > 0 then
-    perform public.notify_staff('Atraso: ' || e.full_name, format('Entrou com %s minutos de atraso.', v_late), 'pontualidade', 'baixa', '/admin/pontualidade',
-      array['super_admin','admin','manager']::public.user_role[]);
-  end if;
-  return v_row;
-end $$;
-
-create or replace function public.clock_out(p_photo text default null) returns public.attendance
-language plpgsql security definer set search_path = public as $$
-declare e public.employees; v_row public.attendance; v_local timestamp := now() at time zone 'Africa/Luanda'; v_early integer; v_over integer;
-begin
-  select * into e from public.employees where profile_id = auth.uid() and status = 'activo';
-  if e is null then raise exception 'Não existe ficha de funcionário activa para este utilizador'; end if;
-  select * into v_row from public.attendance where employee_id = e.id and work_date = v_local::date;
-  if v_row is null or v_row.check_in is null then raise exception 'Ainda não registou entrada hoje'; end if;
-  v_early := greatest(0, (extract(epoch from (e.schedule_end - v_local::time)) / 60)::integer);
-  v_over := greatest(0, (extract(epoch from (v_local::time - e.schedule_end)) / 60)::integer);
-  update public.attendance set check_out = now(), early_leave_minutes = v_early, overtime_minutes = v_over,
-    worked_minutes = (extract(epoch from (now() - check_in)) / 60)::integer, check_out_photo = coalesce(p_photo, check_out_photo)
-  where id = v_row.id returning * into v_row;
-  return v_row;
-end $$;
-
--- Contexto completo para o assistente (apenas administradores)
+-- Assistente: estados de troca corrigidos
 create or replace function public.assistant_context() returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare today date := (now() at time zone 'Africa/Luanda')::date;

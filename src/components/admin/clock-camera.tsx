@@ -42,8 +42,8 @@ export function ClockCamera({ employeeId, today, compact }: { employeeId: string
     setLoading(true)
     const supabase = createClient()
     const blob = await (await fetch(shot)).blob()
-    const path = `${employeeId}/${new Date().toISOString().slice(0, 10)}-${action}.jpg`
-    const { error: upErr } = await supabase.storage.from('attendance').upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+    const path = `${employeeId}/${new Date().toISOString().slice(0, 10)}-${action}-${Date.now()}.jpg`
+    const { error: upErr } = await supabase.storage.from('attendance').upload(path, blob, { contentType: 'image/jpeg', upsert: false })
     if (upErr) { setLoading(false); toast.error('Erro ao guardar a foto', upErr.message); return }
     const url = supabase.storage.from('attendance').getPublicUrl(path).data.publicUrl
     const { error } = action === 'clock_in'
