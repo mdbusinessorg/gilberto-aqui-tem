@@ -1,7 +1,7 @@
 'use client'
 import * as React from 'react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import Link from '@/components/ui/navigation-link'
+import { usePathname } from 'next/navigation'
 import { Search, ShoppingBag, User, Menu, X, Heart, MessageCircle, LayoutDashboard, Headphones, Grid2X2 } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { useCart } from './cart-context'
@@ -14,14 +14,8 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
   const { count, hydrated } = useCart()
   const [open, setOpen] = React.useState(false)
   const [q, setQ] = React.useState('')
-  const router = useRouter()
   const pathname = usePathname()
   React.useEffect(() => setOpen(false), [pathname])
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    router.push(q.trim() ? `/loja?q=${encodeURIComponent(q.trim())}` : '/loja')
-  }
 
   const nav = [
     { href: '/loja', label: 'Loja' },
@@ -45,10 +39,10 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
         <a href={waLink(supportMessage())} target="_blank" rel="noopener" className="ml-auto hidden shrink-0 items-center gap-3 xl:flex">
           <Headphones className="h-8 w-8 text-ink-muted" strokeWidth={1} /><span><span className="block text-[10px] text-ink-muted">Atendimento ao cliente</span><strong className="text-xs">{WHATSAPP_DISPLAY}</strong></span>
         </a>
-        <form onSubmit={submit} role="search" className="store-search hidden flex-1 md:flex max-w-md mx-auto">
+        <form action="/loja" role="search" className="store-search hidden flex-1 md:flex max-w-md mx-auto">
           <div className="relative w-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
-            <input aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="O que procuras hoje?" className="h-9 w-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-brand-500/30" />
+            <input name="q" aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="O que procuras hoje?" className="h-9 w-full pl-9 pr-3 focus:outline-none focus:ring-2 focus:ring-brand-500/30" />
           </div>
           <button type="submit" aria-label="Pesquisar"><Search className="h-4 w-4" /></button>
         </form>
@@ -85,8 +79,8 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
               <Logo />
               <button onClick={() => setOpen(false)} className="p-2 text-ink-soft" aria-label="Fechar"><X className="h-5 w-5" /></button>
             </div>
-            <form onSubmit={submit} className="p-4 border-b border-line">
-              <input aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar produtos…" className="h-10 w-full rounded-md border border-line bg-surface px-3 text-sm" />
+            <form action="/loja" className="p-4 border-b border-line">
+              <input name="q" aria-label="Procurar produtos" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Procurar produtos…" className="h-10 w-full rounded-md border border-line bg-surface px-3 text-sm" />
             </form>
             <div className="flex-1 overflow-y-auto p-2">
               {nav.map((n) => (

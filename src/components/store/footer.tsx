@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { Instagram, Facebook, MessageCircle, MapPin, Clock } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { NewsletterBar } from './newsletter'
