@@ -42,7 +42,7 @@ export function ProductGallery({ images, fallback, name, brand, tag, productId, 
         </div>
         <div className="pd-img">
           {current ? (
-            <Image src={current.url} alt={current.alt ?? name} fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-contain drop-shadow-2xl" />
+            <Image src={current.url} alt={current.alt ?? name} fill priority sizes="(max-width:1024px) 100vw, 50vw" className="object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-ink-muted/30"><Smartphone className="h-20 w-20" strokeWidth={1} /></div>
           )}

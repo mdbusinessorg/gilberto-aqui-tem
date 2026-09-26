@@ -516,3 +516,8 @@ body:has(.pd-page) .wa-float { display: none; }
 .pd-blob { opacity: .92; }
 .pd-thumbs { right: .75rem; }
 @media (max-width: 639px) { .pd-stage { margin: 0 .5rem; } .pd-thumbs { right: .5rem; } }
+.pd-blob { display: none; }
+.pd-img, .pd-page .pd-img { inset: 0 !important; }
+.pd-stage { height: 24rem; }
+.pd-thumb { background: #fff; border-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+@media (max-width: 639px) { .pd-stage { height: 22rem; } }
