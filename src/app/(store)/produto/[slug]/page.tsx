@@ -4,9 +4,8 @@ import { notFound } from 'next/navigation'
 import { ShieldCheck, BadgeCheck } from 'lucide-react'
 import { getProductBySlug }  from '@/lib/store/queries'
 import { ProductGrid, ProductImage } from '@/components/store/product-card'
-import { Stars, Badge } from '@/components/ui'
+import { Stars } from '@/components/ui'
 import { priceOf } from '@/lib/store/price'
-import { formatKz } from '@/lib/utils'
 import { CONDITION } from '@/lib/labels'
 import { ProductBuyBox } from './buy-box'
 import { ProductGallery } from './gallery'
@@ -24,56 +23,34 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const { product: p, images, reviews, related } = res
   const price = priceOf(p)
   const specs = (p.specs ?? {}) as Record<string, string>
-  const dd = (p.device_details ?? {}) as Record<string, unknown>
+
+  const features: [string, string][] = ([
+    [p.storage, 'Armazenamento'], [p.ram, 'Memória RAM'], [p.color, 'Cor'],
+    [p.battery_health != null ? `Bateria ${p.battery_health}%` : null, 'Saúde da bateria'],
+    [p.warranty_months ? `${p.warranty_months} meses` : null, 'Garantia incluída'],
+    [p.condition ? CONDITION[p.condition]?.label : null, 'Condição do aparelho'],
+    [p.model, 'Modelo'],
+    ...Object.entries(specs).map(([k, v]) => [String(v), k]),
+  ] as [string | null | undefined, string][]).filter((f): f is [string, string] => !!f[0]).slice(0, 5)
+  const tag = price.active ? `-${price.discount}%` : p.condition ? CONDITION[p.condition]?.label ?? null : null
 
   return (
-    <div className="shell py-8">
-      <nav className="text-xs text-ink-muted">
-        <Link href="/" className="hover:text-ink">Início</Link> / <Link href="/loja" className="hover:text-ink">Loja</Link>
-        {p.category_slug && <> / <Link href={`/categoria/${p.category_slug}`} className="hover:text-ink">{p.category_name}</Link></>}
-        {' '}/ <span className="text-ink">{p.name}</span>
-      </nav>
-
-      <div className="mt-4 grid gap-8 lg:grid-cols-2">
-        <ProductGallery images={images} fallback={p.image_url} name={p.name ?? ''} />
-        <div>
-          <div className="flex items-center gap-2">
-            {p.brand_name && <span className="text-xs font-semibold uppercase tracking-wide text-ink-muted">{p.brand_name}</span>}
-            {p.condition && <Badge tone={CONDITION[p.condition]?.tone ?? 'neutral'}>{CONDITION[p.condition]?.label ?? p.condition}</Badge>}
-            {price.active && <Badge tone="red">-{price.discount}%</Badge>}
+    <div className="shell pd-page">
+      <div className="pd-card">
+        <div className="grid lg:grid-cols-2 lg:gap-10">
+          <ProductGallery images={images} fallback={p.image_url} name={p.name ?? ''} brand={p.brand_name ?? null} tag={tag} productId={p.id!} slug={p.slug!} />
+          <div className="pd-body">
+            {(p.rating_count ?? 0) > 0 && (
+              <a href="#avaliacoes" className="pd-rating">
+                <Stars value={Number(p.rating_avg)} size="md" />
+                <span>{Number(p.rating_avg).toFixed(1)} · {p.rating_count} avaliações</span>
+              </a>
+            )}
+            <ProductBuyBox p={p} features={features} />
+            {p.warranty_months ? (
+              <div className="pd-warranty"><ShieldCheck className="h-4 w-4" /> Garantia de {p.warranty_months} meses incluída.</div>
+            ) : null}
           </div>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{p.name}</h1>
-          {(p.rating_count ?? 0) > 0 && (
-            <a href="#avaliacoes" className="mt-2 inline-flex items-center gap-2">
-              <Stars value={Number(p.rating_avg)} size="md" />
-              <span className="text-sm text-ink-muted">{Number(p.rating_avg).toFixed(1)} · {p.rating_count} avaliações</span>
-            </a>
-          )}
-          <div className="mt-4 flex items-baseline gap-3">
-            <span className="text-3xl font-semibold tabular">{formatKz(price.final)}</span>
-            {price.active && <span className="text-lg text-ink-muted line-through tabular">{formatKz(price.price)}</span>}
-          </div>
-          <ProductBuyBox p={p} />
-
-          <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-            {[
-              ['Condição', p.condition ? CONDITION[p.condition]?.label : null],
-              ['Armazenamento', p.storage], ['RAM', p.ram], ['Cor', p.color],
-              ['Saúde da bateria', p.battery_health != null ? `${p.battery_health}%` : null],
-              ['Garantia', p.warranty_months ? `${p.warranty_months} meses` : null],
-              ['Modelo', p.model], ['Referência', p.sku],
-            ].filter(([, v]) => v).map(([k, v]) => (
-              <div key={k as string} className="rounded-md border border-line px-3 py-2">
-                <p className="text-xs text-ink-muted">{k}</p><p className="mt-0.5 font-medium">{v as string}</p>
-              </div>
-            ))}
-          </div>
-
-          {p.warranty_months ? (
-            <div className="mt-4 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">
-              <ShieldCheck className="h-4 w-4" /> Garantia de {p.warranty_months} meses incluída.
-            </div>
-          ) : null}
         </div>
       </div>
 
