@@ -480,3 +480,34 @@ a.dash-chip:hover { border-color: #1546b8; color: #1546b8; }
 .pd-cta { height: 3rem; padding: 0 1.5rem; border-radius: 1rem; background: #1546B8; color: #fff; font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
 .pd-cta:hover { background: #0f3894; }
 .pd-cta:disabled { background: #cbd5e1; }
+
+/* Armazém: divisões por categoria */
+.wh-room { border: 1px solid #e5e7eb; border-radius: 1rem; background: #fff; overflow: hidden; }
+.wh-room-head { display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem; background: #f5f8ff; border-bottom: 1px solid #e5e7eb; }
+.wh-room-head h3 { font-weight: 700; font-size: .95rem; }
+.wh-room-head span { margin-left: auto; font-size: .75rem; color: #6b7280; }
+.wh-room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .5rem; padding: .75rem; }
+.wh-item { display: flex; flex-direction: column; align-items: center; text-align: center; padding: .75rem .5rem; border-radius: .75rem; border: 1px solid #f1f2f4; background: #fafafa; }
+.wh-item-name { margin-top: .5rem; font-size: .8rem; font-weight: 600; line-height: 1.2; }
+.wh-item-meta { font-size: .65rem; color: #9ca3af; }
+.wh-item-qty { margin-top: .35rem; font-size: .9rem; font-weight: 800; color: #1546B8; }
+.wh-item-price { font-size: .7rem; color: #6b7280; }
+body:has(.pd-page) .wa-float { display: none; }
+@media (min-width: 1024px) { body:has(.pd-page) .wa-float { display: flex; } }
+@media (max-width: 639px) {
+  .pd-page { padding-left: .75rem; padding-right: .75rem; }
+  .pd-title { font-size: .95rem; }
+  .pd-stage { height: 20rem; margin: 0; }
+  .pd-blob { left: 8%; right: 26%; }
+  .pd-img { inset: 4% 24% 4% 8%; }
+  .pd-thumb { width: 3.75rem; height: 3.25rem; }
+  .pd-brand { left: 8.5%; }
+  .pd-feat-k { font-size: .85rem; }
+  .pd-feat-v { font-size: .62rem; }
+  .pd-actions { flex-direction: column; }
+  .pd-bar { padding: .7rem 1rem; }
+  .pd-amt { font-size: 1.5rem; }
+  .pd-cta { height: 2.75rem; padding: 0 1.1rem; font-size: .72rem; }
+  .pd-page .mt-12 { margin-top: 2rem; }
+  .pd-page .mt-14 { margin-top: 2rem; }
+}

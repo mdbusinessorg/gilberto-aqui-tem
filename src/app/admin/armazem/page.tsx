@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, ArrowRight, Package, Warehouse } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Package, Warehouse, Home } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader, Card, CardHeader, Table, THead, TBody, StatusBadge, EmptyState, Input, Button, ButtonLink, Badge } from '@/components/ui'
 import { formatKz, formatDateTime } from '@/lib/utils'
@@ -14,7 +14,7 @@ export default async function WarehousePage({ searchParams }: { searchParams: { 
   const supabase = createClient()
   const [locationResult, productResult] = await Promise.all([
     supabase.from('inventory_locations').select('*').order('sort_order'),
-    supabase.from('products').select('id,name,sku,is_active,stock_total,min_stock,price,cost_price,inventory(location_id,quantity),product_images(url,is_primary,sort_order)').order('name'),
+    supabase.from('products').select('id,name,sku,is_active,stock_total,min_stock,price,cost_price,categories(name),inventory(location_id,quantity),product_images(url,is_primary,sort_order)').order('name'),
   ])
   if (locationResult.error || productResult.error) throw new Error('Não foi possível carregar o inventário. Tenta novamente.')
   const locations = locationResult.data
@@ -35,6 +35,11 @@ export default async function WarehousePage({ searchParams }: { searchParams: { 
   const query = (searchParams.q ?? '').trim().toLocaleLowerCase('pt-PT')
   const localProducts = selected ? products.filter((p) => (physicalStock.get(p.id) ?? 0) > 0) : []
   const visible = localProducts.filter((p) => `${p.name} ${p.sku}`.toLocaleLowerCase('pt-PT').includes(query))
+  const rooms = Array.from(visible.reduce((map, p) => {
+    const key = p.categories?.name ?? 'Sem categoria'
+    map.set(key, [...(map.get(key) ?? []), p])
+    return map
+  }, new Map<string, typeof visible>()).entries()).sort(([a], [b]) => a.localeCompare(b, 'pt'))
 
   return (
     <>
@@ -68,30 +73,37 @@ export default async function WarehousePage({ searchParams }: { searchParams: { 
           {!locations.length && <EmptyState title="Sem localizações disponíveis" />}
         </section>
       ) : <Card className="mb-6">
-        <CardHeader title={`Produtos — ${selected.name}`} description="Apenas produtos com unidades registadas neste local." />
+        <CardHeader title={`Produtos — ${selected.name}`} description="Cada categoria é uma divisão desta casa: abre e vê os produtos e unidades presentes." />
         <form className="flex gap-3 border-b border-line p-4">
           <input type="hidden" name="local" value={selected.slug} />
           <Input key={`${selected.id}-${searchParams.q ?? ''}`} name="q" aria-label="Pesquisar produto ou SKU nesta localização" placeholder="Pesquisar produto ou SKU…" defaultValue={searchParams.q} />
           <Button type="submit" variant="outline">Pesquisar</Button>
         </form>
-        <Table>
-          <THead><tr><th>Produto</th><th className="text-right">Quantidade neste local</th><th className="text-right">Preço de venda</th></tr></THead>
-          <TBody>
-            {visible.map((p) => {
-              const image = [...p.product_images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order)[0]
-              return (
-                <tr key={p.id}>
-                  <td><div className="flex min-w-48 items-center gap-3">
-                    {image ? <Image src={image.url} alt={p.name} width={40} height={40} unoptimized className="h-10 w-10 object-contain" /> : <Package className="h-8 w-8 shrink-0 text-ink-muted" />}
-                    <div><p className="font-medium">{p.name}</p><p className="text-xs text-ink-muted">{p.sku}</p>{!p.is_active && <Badge>Oculto na loja</Badge>}</div>
-                  </div></td>
-                  <td className="text-right tabular font-semibold">{physicalStock.get(p.id) ?? 0}</td>
-                  <td className="text-right tabular">{formatKz(p.price)}</td>
-                </tr>
-              )
-            })}
-          </TBody>
-        </Table>
+        <div className="grid gap-4 p-4 md:grid-cols-2">
+          {rooms.map(([cat, items]) => (
+            <section key={cat} className="wh-room">
+              <header className="wh-room-head">
+                <Home aria-hidden="true" className="h-5 w-5 text-brand-600" />
+                <h3>{cat}</h3>
+                <span>{items.length} produtos · {items.reduce((s, p) => s + (physicalStock.get(p.id) ?? 0), 0)} un.</span>
+              </header>
+              <ul className="wh-room-grid">
+                {items.map((p) => {
+                  const image = [...p.product_images].sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order)[0]
+                  return (
+                    <li key={p.id} className="wh-item">
+                      {image ? <Image src={image.url} alt={p.name} width={56} height={56} unoptimized className="h-14 w-14 object-contain" /> : <Package className="h-10 w-10 text-ink-muted" />}
+                      <p className="wh-item-name">{p.name}</p>
+                      <p className="wh-item-meta">{p.sku}{!p.is_active && ' · oculto'}</p>
+                      <p className="wh-item-qty">{physicalStock.get(p.id) ?? 0} un.</p>
+                      <p className="wh-item-price">{formatKz(p.price)}</p>
+                    </li>
+                  )
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
         {!visible.length && <EmptyState compact title={query ? 'Nenhum produto encontrado' : 'Esta localização está vazia'}
           description={query ? 'Pesquisa outro nome ou SKU nesta localização.' : 'Regista uma entrada ou uma transferência para este local em «Novo movimento».'} />}
         <div className="space-y-1 border-t border-line p-4 text-xs text-ink-muted">
