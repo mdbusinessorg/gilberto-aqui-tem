@@ -17,7 +17,9 @@ export type Database = {
       attendance: {
         Row: {
           check_in: string | null
+          check_in_photo?: string | null
           check_out: string | null
+          check_out_photo?: string | null
           created_at: string
           device_info: string | null
           early_leave_minutes: number
@@ -2388,7 +2390,7 @@ export type Database = {
         Returns: string
       }
       clock_in: {
-        Args: { p_device?: string }
+        Args: { p_device?: string; p_photo?: string }
         Returns: {
           check_in: string | null
           check_out: string | null
@@ -2413,7 +2415,7 @@ export type Database = {
         }
       }
       clock_out: {
-        Args: never
+        Args: { p_photo?: string }
         Returns: {
           check_in: string | null
           check_out: string | null
@@ -2438,6 +2440,7 @@ export type Database = {
         }
       }
       dashboard_stats: { Args: never; Returns: Json }
+      assistant_context: { Args: never; Returns: Json }
       effective_price: {
         Args: { p: Database["public"]["Tables"]["products"]["Row"] }
         Returns: number

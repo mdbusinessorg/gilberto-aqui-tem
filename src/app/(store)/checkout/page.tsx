@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ShoppingBag, CheckCircle2 } from 'lucide-react'
+import { ShoppingBag, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import { useCart } from '@/components/store/cart-context'
 import { Button, Field, Input, Select, Textarea, EmptyState, ButtonLink } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
@@ -59,7 +59,8 @@ export default function CheckoutPage() {
         <h1 className="mt-4 text-2xl font-semibold">Pedido recebido!</h1>
         <p className="mt-2 text-ink-muted">O teu pedido <strong className="text-ink">{done.number}</strong> foi criado com total de <strong className="text-ink">{formatKz(done.total)}</strong>. Vamos contactar-te para confirmar.</p>
         <div className="mt-6 flex justify-center gap-3">
-          <ButtonLink href={`/pedido?n=${done.number}&t=${encodeURIComponent(form.phone)}`}>Acompanhar pedido</ButtonLink>
+          <ButtonLink href={`/fatura?n=${done.number}&t=${encodeURIComponent(form.phone)}`}>Ver fatura</ButtonLink>
+          <ButtonLink href={`/pedido?n=${done.number}&t=${encodeURIComponent(form.phone)}`} variant="outline">Acompanhar pedido</ButtonLink>
           <ButtonLink href="/loja" variant="outline">Continuar a comprar</ButtonLink>
         </div>
       </div>
@@ -70,19 +71,22 @@ export default function CheckoutPage() {
   const total = subtotal + (form.delivery === 'entrega' ? fee : 0)
   return (
     <div className="shell py-8">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Checkout</h1>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div><h1 className="text-2xl font-semibold tracking-tight">Finalizar compra</h1><p className="mt-1 text-sm text-ink-muted">Preenche os dados e confirmamos por WhatsApp.</p></div>
+        <ol className="co-steps"><li className="done">Carrinho</li><li className="active">Dados & entrega</li><li>Confirmação</li></ol>
+      </div>
       <form onSubmit={submit} className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-lg border border-line p-5">
-            <h2 className="font-semibold">Os teus dados</h2>
+          <div className="co-card">
+            <h2 className="co-title"><span>1</span>Os teus dados</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Nome completo" required><Input value={form.name} onChange={(e) => set('name', e.target.value)} required /></Field>
               <Field label="Telefone / WhatsApp" required><Input value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="+244 …" required /></Field>
               <Field label="Email" className="sm:col-span-2"><Input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} /></Field>
             </div>
           </div>
-          <div className="rounded-lg border border-line p-5">
-            <h2 className="font-semibold">Entrega</h2>
+          <div className="co-card">
+            <h2 className="co-title"><span>2</span>Entrega e pagamento</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Método">
                 <Select value={form.delivery} onChange={(e) => set('delivery', e.target.value)}>
@@ -100,19 +104,20 @@ export default function CheckoutPage() {
               </Field>
             </div>
           </div>
-          <div className="rounded-lg border border-line p-5">
-            <div className="grid gap-4 sm:grid-cols-2">
+          <div className="co-card">
+            <h2 className="co-title"><span>3</span>Cupão e notas</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <Field label="Cupão de desconto"><Input value={form.coupon} onChange={(e) => set('coupon', e.target.value)} placeholder="Código (opcional)" /></Field>
               <Field label="Notas"><Input value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Opcional" /></Field>
             </div>
           </div>
         </div>
-        <div className="h-fit rounded-lg border border-line p-5 lg:sticky lg:top-32">
-          <h2 className="font-semibold">O teu pedido</h2>
+        <div className="co-summary lg:sticky lg:top-32">
+          <h2 className="font-semibold">O teu pedido <span className="text-sm font-normal text-ink-muted">({items.length} {items.length === 1 ? 'artigo' : 'artigos'})</span></h2>
           <ul className="mt-3 max-h-56 space-y-3 overflow-y-auto">
             {items.map((i) => (
               <li key={i.id} className="flex items-center gap-3 text-sm">
-                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded bg-surface">{i.image && <Image src={i.image} alt="" fill sizes="44px" className="object-cover" />}</div>
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-line bg-white">{i.image && <Image src={i.image} alt="" fill sizes="44px" className="object-cover" />}</div>
                 <span className="flex-1 leading-tight">{i.name} <span className="text-ink-muted">×{i.quantity}</span></span>
                 <span className="tabular">{formatKz(i.price * i.quantity)}</span>
               </li>
@@ -121,10 +126,10 @@ export default function CheckoutPage() {
           <div className="mt-4 space-y-2 border-t border-line pt-3 text-sm">
             <div className="flex justify-between"><span className="text-ink-muted">Subtotal</span><span className="tabular">{formatKz(subtotal)}</span></div>
             <div className="flex justify-between"><span className="text-ink-muted">Entrega</span><span className="tabular">{formatKz(form.delivery === 'entrega' ? fee : 0)}</span></div>
-            <div className="flex justify-between text-base font-semibold"><span>Total</span><span className="tabular">{formatKz(total)}</span></div>
+            <div className="co-total"><span>Total</span><span className="tabular">{formatKz(total)}</span></div>
           </div>
           <Button type="submit" size="lg" loading={loading} className="mt-4 w-full">Confirmar pedido</Button>
-          <p className="mt-3 text-center text-xs text-ink-muted">Sem registo obrigatório. Confirmamos por telefone/WhatsApp.</p>
+          <p className="co-trust"><ShieldCheck className="h-3.5 w-3.5" /> Compra segura · Sem registo obrigatório · Confirmação por WhatsApp</p>
         </div>
       </form>
     </div>

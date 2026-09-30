@@ -1,8 +1,8 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
-import { ArrowRight, ChevronRight, MessageCircle, RefreshCw, ShieldCheck, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
-import { ProductCard } from '@/components/store/product-card'
-import { HomeHero, HomeProductTabs, type HeroSlide } from '@/components/store/home-showcase'
+import { ChevronRight, ChevronLeft, Menu, Truck, ShieldCheck, RefreshCw, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
+import { ProductCard, ProductImage } from '@/components/store/product-card'
+import { Stars } from '@/components/ui'
 import { getProducts, getCategories, getBrands, getBanners } from '@/lib/store/queries'
 import { priceOf } from '@/lib/store/price'
 import { formatKz } from '@/lib/utils'
@@ -14,115 +14,146 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   iphone: Smartphone, samsung: Smartphone, android: Smartphone, laptops: Laptop, macbook: Laptop,
   playstation: Gamepad2, airpods: Headphones, 'apple-watch': Watch, acessorios: Cable, audio: Headphones,
 }
+const TABS = [
+  { key: 'novidades', label: 'Novidades' },
+  { key: 'destaques', label: 'Destaques' },
+  { key: 'promocoes', label: 'Promoções' },
+  { key: 'diversos', label: 'Diversos' },
+] as const
+type TabKey = (typeof TABS)[number]['key']
 
-export default async function HomePage() {
-  const [recent, featured, promos, popular, phones, audio, categories, brands, banners] = await Promise.all([
-    getProducts({ sort: 'recent', inStock: true, perPage: 9 }),
-    getProducts({ featured: true, inStock: true, perPage: 9 }),
-    getProducts({ promo: true, inStock: true, perPage: 9 }),
+export default async function HomePage({ searchParams }: { searchParams?: { aba?: string } }) {
+  const tab: TabKey = TABS.some(t => t.key === searchParams?.aba) ? (searchParams!.aba as TabKey) : 'novidades'
+  const [recent, featured, promos, misc, popular, phones, audio, categories, brands, banners] = await Promise.all([
+    getProducts({ sort: 'recent', inStock: true, perPage: 3 }),
+    getProducts({ featured: true, inStock: true, perPage: 3 }),
+    getProducts({ promo: true, inStock: true, perPage: 3 }),
+    getProducts({ categories: ['acessorios', 'apple-watch', 'airpods', 'playstation', 'laptops', 'macbook'], inStock: true, perPage: 3 }),
     getProducts({ sort: 'popular', inStock: true, perPage: 3 }),
     getProducts({ categories: ['iphone', 'samsung', 'android'], inStock: true, perPage: 4 }),
     getProducts({ category: 'audio', inStock: true, perPage: 4 }),
     getCategories(), getBrands(), getBanners(),
   ])
-  const hasSales = popular.products.some(p => (p.sold_count ?? 0) > 0)
-  const selections = hasSales ? popular.products : featured.products.slice(0, 3)
+  const tabProducts: Record<TabKey, typeof recent.products> = { novidades: recent.products, destaques: featured.products, promocoes: promos.products, diversos: misc.products }
+  const shown = tabProducts[tab].length ? tabProducts[tab] : recent.products
+  const banner = banners[0]
+  const heroImage = banner?.image_url || '/promotions/iphone-x-hero.webp'
+  const heroPhone = phones.products.find(p => /iphone x/i.test(p.name ?? '')) ?? phones.products[0]
   const deal = promos.products[0]
-  const hero: HeroSlide[] = banners.length ? banners.map(b => ({
-    title: b.title, subtitle: b.subtitle ?? 'Novidades na Gilberto Aqui Tem',
-    image: b.image_url || '/promotions/iphone-x-hero.webp', href: b.link_url ?? '/loja', label: b.cta_label ?? 'Ver produtos',
-  })) : [
-    { title: 'iPhone X', subtitle: 'Encontra o teu próximo iPhone aqui.', image: '/promotions/iphone-x-hero.webp', href: '/loja?q=iPhone+X', label: 'Ver iPhone X', phone: true },
-    { title: 'Apple Watch', subtitle: 'Tecnologia que acompanha o teu ritmo.', image: '/products/apple-watch.webp', href: '/categoria/apple-watch', label: 'Descobrir' },
-    { title: 'Som em cada detalhe.', subtitle: 'Colunas e auscultadores para a tua música.', image: '/products/beats-headphones.webp', href: '/categoria/audio', label: 'Explorar áudio' },
-  ]
+  const best = (popular.products.some(p => (p.sold_count ?? 0) > 0) ? popular.products : featured.products).slice(0, 3)
+  const topCategories = categories.filter(c => !c.parent_id).slice(0, 7)
+  const childrenOf = (id: string) => categories.filter(c => c.parent_id === id).map(c => c.name).slice(0, 3).join(', ')
+  const promoA = audio.products[0]
+  const promoB = misc.products[0]
+  const promoC = audio.products[1]
+  const promoD = misc.products[1]
 
   return (
-    <div className="reference-home shell">
-      <div className="home-layout">
-        <aside className="home-sidebar">
-          <nav aria-label="Categorias de produtos" className="home-categories">
-            <div className="home-category-title"><Grid2X2 className="h-4 w-4" /> Comprar por categoria</div>
+    <div className="sm-home">
+      <div className="shell sm-layout">
+        <aside className="sm-side">
+          <div className="sm-cats">
+            <h2><Menu className="h-4 w-4" /> Categorias</h2>
             <ul>
-              {categories.filter(c => !c.parent_id).map(c => {
-                const Icon = CATEGORY_ICONS[c.slug] ?? Grid2X2
-                return <li key={c.id}><Link href={`/categoria/${c.slug}`}><Icon className="h-5 w-5 shrink-0" /><span>{c.name}</span><ChevronRight className="ml-auto h-3 w-3" /></Link></li>
-              })}
+              {topCategories.map(c => { const Icon = CATEGORY_ICONS[c.slug] ?? Grid2X2; return (
+                <li key={c.id}><Link href={`/categoria/${c.slug}`}><Icon className="h-4 w-4" /><span><strong>{c.name}</strong><small>{childrenOf(c.id) || 'Ver produtos'}</small></span><ChevronRight className="h-3.5 w-3.5" /></Link></li>
+              ) })}
+              <li><Link href="/loja"><Grid2X2 className="h-4 w-4" /><span><strong>Todos os produtos</strong><small>Catálogo completo</small></span><ChevronRight className="h-3.5 w-3.5" /></Link></li>
             </ul>
+          </div>
+
+          {deal && (
+            <div className="sm-box sm-deal">
+              <h3>Hot Deal</h3>
+              <Link href={`/produto/${deal.slug}`}>
+                <div className="sm-deal-image"><ProductImage src={deal.image_url} alt={deal.name ?? ''} className="h-full w-full p-4" sizes="240px" /></div>
+                <p>{deal.name}</p>
+                <Stars value={Number(deal.rating_avg ?? 5)} />
+                <div className="sm-price"><strong>{formatKz(priceOf(deal).final)}</strong>{priceOf(deal).active && <s>{formatKz(priceOf(deal).price)}</s>}</div>
+              </Link>
+            </div>
+          )}
+
+          {best.length > 0 && (
+            <div className="sm-box">
+              <h3>Mais Vendidos</h3>
+              {best.map(p => (
+                <Link key={p.id} href={`/produto/${p.slug}`} className="sm-best">
+                  <div className="sm-best-image"><ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-1.5" sizes="64px" /></div>
+                  <div><Stars value={Number(p.rating_avg ?? 5)} /><p>{p.name}</p><strong>{formatKz(priceOf(p).final)}</strong></div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <nav aria-label="Marcas" className="sm-brands sm-brands-side">
+            {brands.filter(b => ['apple', 'samsung', 'sony', 'dell', 'jbl', 'hp'].includes(b.slug)).map(b => <Link key={b.id} href={`/loja?marca=${b.slug}`}>{b.name}</Link>)}
           </nav>
 
-          {deal && <section className="home-deal home-sidebar-box">
-            <SectionHeading title="Ofertas especiais" href="/loja?promo=1" />
-            <ProductCard p={deal} />
-            {priceOf(deal).active && <p className="deal-saving">Poupa <strong>{formatKz(priceOf(deal).price - priceOf(deal).final)}</strong></p>}
-            <Link href={`/produto/${deal.slug}`} className="deal-link">Aproveitar oferta <ArrowRight className="h-3 w-3" /></Link>
-          </section>}
-
-          <section className="home-sidebar-box home-selections">
-            <SectionHeading title={hasSales ? 'Mais vendidos' : 'Escolhas da loja'} href="/loja?ordem=popular" />
-            {selections.map(p => <ProductCard key={p.id} p={p} horizontal compact />)}
-          </section>
-
-          <section className="home-sidebar-box home-store-story">
-            <SectionHeading title="Aqui também trocamos" href="/trocas" />
-            <div className="relative mx-3 aspect-[4/3] bg-surface"><Image src="/products/iphone-x.webp" alt="iPhone para troca" fill sizes="240px" className="object-contain p-5 mix-blend-multiply" /></div>
-            <h3>O teu próximo telemóvel começa aqui.</h3>
-            <p>Compramos, vendemos e trocamos. Envia os dados do teu aparelho e pede uma avaliação à nossa equipa.</p>
-            <Link href="/trocas">Saber mais <ArrowRight className="h-3 w-3" /></Link>
-          </section>
-
-          <div className="home-service-list">
+          <div className="sm-services">
             {[
-              { icon: MessageCircle, title: 'Atendimento directo', text: 'Fala connosco no WhatsApp', href: waLink(supportMessage()) },
-              { icon: RefreshCw, title: 'Compramos e trocamos', text: 'Pede a avaliação do teu aparelho', href: '/trocas' },
-              { icon: ShieldCheck, title: 'Compra com informação', text: 'Estado e garantia na ficha', href: '/loja' },
-            ].map(service => <Link key={service.title} href={service.href} className="home-service"><span><service.icon className="h-5 w-5" /></span><div><strong>{service.title}</strong><p>{service.text}</p></div></Link>)}
+              { icon: Truck, title: 'Entrega em Luanda', text: 'Combinada no WhatsApp', href: waLink(supportMessage()) },
+              { icon: RefreshCw, title: 'Compramos e trocamos', text: 'Avalia o teu aparelho', href: '/trocas' },
+              { icon: ShieldCheck, title: 'Garantia', text: 'Estado e garantia na ficha', href: '/loja' },
+            ].map(s => <Link key={s.title} href={s.href}><span><s.icon className="h-4 w-4" /></span><div><strong>{s.title}</strong><p>{s.text}</p></div></Link>)}
           </div>
         </aside>
 
-        <div className="home-main">
-          <HomeHero slides={hero} />
-          <HomeProductTabs tabs={[{ label: 'Novidades', products: recent.products }, { label: 'Em destaque', products: featured.products }, { label: 'Em promoção', products: promos.products }]} />
+        <main className="sm-main">
+          <nav className="sm-menu" aria-label="Menu principal">
+            <Link href="/" className="active">Início</Link><Link href="/loja">Loja</Link><Link href="/loja?promo=1">Promoções</Link><Link href="/trocas">Trocas</Link><Link href="/contacto">Contacto</Link>
+          </nav>
 
-          <div className="home-banner-pair">
-            <PromoBanner eyebrow="Som de estúdio" title="Colunas & áudio" image="/products/yamaha-speaker.webp" href="/categoria/audio" />
-            <PromoBanner eyebrow="Pequeno no tamanho" title="Dell Studio Hybrid" image="/products/dell-hybrid.webp" href="/loja?q=Dell+Studio+Hybrid" />
-          </div>
-
-          <section className="home-phones">
-            <SectionHeading title="Smartphones" href="/loja?categoria=iphone" />
-            <div className="home-phone-grid">{phones.products.map(p => <ProductCard key={p.id} p={p} horizontal />)}</div>
+          <section className="sm-hero" aria-label="Destaque">
+            <div className="sm-hero-copy">
+              <h1>{banner?.title ?? heroPhone?.name ?? 'iPhone'}</h1>
+              <p>{banner?.subtitle ?? 'Já disponível na Gilberto Aqui Tem'}</p>
+              <div><Link href={banner?.link_url ?? (heroPhone ? `/produto/${heroPhone.slug}` : '/loja')}>Saber mais</Link><span>|</span><Link href={heroPhone ? `/produto/${heroPhone.slug}` : '/loja'}>Comprar</Link></div>
+            </div>
+            <Image src={heroImage} alt="" fill priority sizes="(max-width: 1023px) 100vw, 820px" className="sm-hero-image" />
+            <div className="sm-dots"><i className="on" /><i /></div>
           </section>
 
-          <Link href="/loja?q=iPhone+X" className="home-iphone-banner">
-            <span className="iphone-banner-pill">COMPRAMOS<br /><strong>E TROCAMOS</strong></span>
-            <span className="relative z-10"><strong>iPhone X</strong><span>O teu próximo iPhone está aqui.</span></span>
-            <Image src="/promotions/iphone-x-hero.webp" alt="" fill sizes="(max-width: 767px) 100vw, 850px" className="iphone-banner-image" />
-          </Link>
+          <div className="sm-tabs">
+            <div>{TABS.map(t => <Link key={t.key} href={t.key === 'novidades' ? '/#tabs' : `/?aba=${t.key}#tabs`} className={t.key === tab ? 'active' : ''} id={t.key === tab ? 'tabs' : undefined}>{t.label}</Link>)}</div>
+            <div className="sm-arrows"><Link href="/loja" aria-label="Ver loja"><ChevronLeft className="h-3.5 w-3.5" /></Link><Link href="/loja" aria-label="Ver loja"><ChevronRight className="h-3.5 w-3.5" /></Link></div>
+          </div>
+          <div className="sm-grid3">{shown.map(p => <ProductCard key={p.id} p={p} />)}</div>
 
-          {audio.products.length > 0 && <section className="home-audio">
-            <SectionHeading title="Áudio" href="/categoria/audio" />
-            <div className="home-audio-grid">{audio.products.map(p => <ProductCard key={p.id} p={p} />)}</div>
-          </section>}
-        </div>
+          <div className="sm-banners">
+            {promoA && <Link href={`/produto/${promoA.slug}`} className="sm-banner"><div><small>Áudio</small><strong>{promoA.name}</strong><span>Comprar</span></div><div className="sm-banner-image"><ProductImage src={promoA.image_url} alt="" className="h-full w-full p-2" sizes="160px" /></div></Link>}
+            {promoB && <Link href={`/produto/${promoB.slug}`} className="sm-banner"><div><small>Diversos</small><strong>{promoB.name}</strong><span>Comprar</span></div><div className="sm-banner-image"><ProductImage src={promoB.image_url} alt="" className="h-full w-full p-2" sizes="160px" /></div></Link>}
+          </div>
+
+          {phones.products.length > 0 && (
+            <section className="sm-section">
+              <div className="sm-heading"><h2>Smartphones</h2><Link href="/loja?categoria=iphone">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid2">{phones.products.map(p => <ProductCard key={p.id} p={p} horizontal compact />)}</div>
+            </section>
+          )}
+
+          {heroPhone && (
+            <Link href={`/produto/${heroPhone.slug}`} className="sm-wide">
+              <span className="sm-wide-tag">A partir de<br /><strong>{formatKz(priceOf(heroPhone).final)}</strong></span>
+              <div><h3>{heroPhone.name}</h3><p>Diz olá ao futuro.</p></div>
+              <div className="sm-wide-image"><ProductImage src={heroPhone.image_url} alt="" className="h-full w-full" sizes="300px" /></div>
+            </Link>
+          )}
+
+          {(misc.products.length > 0 || audio.products.length > 0) && (
+            <section className="sm-section">
+              <div className="sm-heading"><h2>Diversos</h2><Link href="/loja">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{(misc.products.length ? misc.products : audio.products).slice(0, 4).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section>
+          )}
+
+          <div className="sm-banners">
+            {promoC && <Link href={`/produto/${promoC.slug}`} className="sm-banner"><div><small>Som</small><strong>{promoC.name}</strong><span>A partir de {formatKz(priceOf(promoC).final)}</span></div><div className="sm-banner-image"><ProductImage src={promoC.image_url} alt="" className="h-full w-full p-2" sizes="160px" /></div></Link>}
+            {promoD && <Link href={`/produto/${promoD.slug}`} className="sm-banner"><div><small>Diversos</small><strong>{promoD.name}</strong><span>A partir de {formatKz(priceOf(promoD).final)}</span></div><div className="sm-banner-image"><ProductImage src={promoD.image_url} alt="" className="h-full w-full p-2" sizes="160px" /></div></Link>}
+          </div>
+
+        </main>
       </div>
-
-      <div className="home-bottom-banners">
-        <PromoBanner eyebrow="Som para o teu espaço" title="Colunas Logitech" image="/products/logitech-speakers.webp" href="/loja?q=Logitech" />
-        <PromoBanner eyebrow="Uma nova perspectiva" title="DJI Mavic Pro" image="/products/dji-mavic.webp" href="/loja?q=DJI+Mavic" />
-      </div>
-
-      <nav aria-label="Marcas disponíveis" className="home-brands">
-        {brands.filter(b => ['apple', 'samsung', 'sony', 'dell', 'jbl', 'hp'].includes(b.slug)).map(b => <Link key={b.id} href={`/loja?marca=${b.slug}`} className={`brand-wordmark brand-${b.slug}`}>{b.name}</Link>)}
-      </nav>
     </div>
   )
-}
-
-function SectionHeading({ title, href }: { title: string; href: string }) {
-  return <div className="home-section-heading"><h2>{title}</h2><span /><Link href={href} aria-label={`Ver todos: ${title}`}><ChevronRight className="h-4 w-4" /></Link></div>
-}
-
-function PromoBanner({ eyebrow, title, image, href }: { eyebrow: string; title: string; image: string; href: string }) {
-  return <Link href={href} className="home-promo"><Image src={image} alt="" fill sizes="(max-width: 767px) 90vw, 480px" className="promo-image" /><div><p>{eyebrow}</p><h3>{title}</h3><span>Comprar agora <ArrowRight className="h-3 w-3" /></span></div></Link>
 }

@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { Loader2, X, Inbox } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Tone } from '@/lib/labels'
@@ -116,7 +116,7 @@ export function StatusBadge<T extends string>({ map, value }: { map: Record<T, {
 
 /* ------------------------------------------------------------------ Card */
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('rounded-lg border border-line bg-white shadow-card', className)} {...props}>{children}</div>
+  return <div className={cn('ui-card rounded-lg border border-line bg-white shadow-card', className)} {...props}>{children}</div>
 }
 export function CardHeader({ title, description, action, className }: { title: React.ReactNode; description?: React.ReactNode; action?: React.ReactNode; className?: string }) {
   return (
@@ -217,7 +217,7 @@ export function ConfirmDialog({ open, onClose, onConfirm, title, description, co
 /* ------------------------------------------------------------------ Misc */
 export function PageHeader({ title, description, actions, breadcrumb }: { title: React.ReactNode; description?: React.ReactNode; actions?: React.ReactNode; breadcrumb?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="page-heading mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         {breadcrumb && <div className="mb-1 text-xs text-ink-muted">{breadcrumb}</div>}
         <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl">{title}</h1>

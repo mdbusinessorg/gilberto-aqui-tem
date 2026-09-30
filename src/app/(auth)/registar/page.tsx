@@ -1,13 +1,11 @@
 'use client'
 import * as React from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import Link from '@/components/ui/navigation-link'
 import { Button, Field, Input, Card, CardBody } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
 import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
-  const router = useRouter()
   const toast = useToast()
   const [loading, setLoading] = React.useState(false)
   const [f, setF] = React.useState({ name: '', phone: '', email: '', password: '' })
@@ -28,8 +26,7 @@ export default function RegisterPage() {
     setLoading(false)
     if (error) { toast.error('Não foi possível criar a conta', error.message); return }
     toast.success('Conta criada', 'Bem-vindo à Gilberto Aqui Tem.')
-    router.push('/conta')
-    router.refresh()
+    window.location.assign('/conta')
   }
 
   return (

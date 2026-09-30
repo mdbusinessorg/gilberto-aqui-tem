@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ProductCard } from './product-card'

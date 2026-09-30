@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { Bell } from 'lucide-react'
 import { createClient, getSessionProfile } from '@/lib/supabase/server'
 import { PageHeader, Card, EmptyState, Badge } from '@/components/ui'
