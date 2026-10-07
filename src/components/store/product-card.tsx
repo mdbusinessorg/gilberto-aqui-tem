@@ -52,8 +52,13 @@ export function ProductCard({ p, compact, horizontal, actions }: { p: Storefront
           {out && <Badge tone="neutral">Esgotado</Badge>}
         </div>
         {!out && !compact && (
-          <button onClick={quickAdd} className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-sm border border-line bg-white text-ink transition-colors md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-brand-600 hover:text-white" aria-label={`Adicionar ${p.name} ao carrinho`}>
+          <button onClick={quickAdd} className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-brand-600 text-white shadow-md transition-transform md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 hover:bg-brand-700 active:scale-90" aria-label={`Adicionar ${p.name} ao carrinho`}>
             <ShoppingBag className="h-4 w-4" />
+          </button>
+        )}
+        {!out && compact && (
+          <button onClick={quickAdd} className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-white shadow-md transition-transform hover:bg-brand-700 active:scale-90" aria-label={`Adicionar ${p.name} ao carrinho`}>
+            <ShoppingBag className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
