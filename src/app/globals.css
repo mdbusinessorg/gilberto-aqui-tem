@@ -521,3 +521,66 @@ body:has(.pd-page) .wa-float { display: none; }
 .pd-stage { height: 24rem; }
 .pd-thumb { background: #fff; border-color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 @media (max-width: 639px) { .pd-stage { height: 22rem; } }
+
+/* ===== Motion system (subtil — apenas transform/opacity) ===== */
+.rv { opacity: 0; transform: translateY(18px); transition: opacity .45s ease, transform .45s cubic-bezier(.22,.61,.36,1); }
+.rv.rv-in { opacity: 1; transform: none; }
+
+.sm-hero .sm-hero-copy > * { animation: sm-rise .5s cubic-bezier(.22,.61,.36,1) both; }
+.sm-hero .sm-hero-copy > p { animation-delay: .08s; }
+.sm-hero .sm-hero-copy > div { animation-delay: .16s; }
+.sm-hero .sm-hero-image { animation: sm-fade .6s ease both; }
+@keyframes sm-rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes sm-fade { from { opacity: 0; } }
+
+.product-card { transition: transform .25s cubic-bezier(.22,.61,.36,1), box-shadow .25s ease, border-color .2s ease; }
+.product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(16,42,90,.10); }
+.product-card:active { transform: translateY(-2px) scale(.99); }
+.product-card-image img { transition: transform .35s cubic-bezier(.22,.61,.36,1); }
+.product-card:hover .product-card-image img { transform: scale(1.05); }
+.product-card-image > button { transition: opacity .2s ease, transform .15s ease, background-color .15s ease; }
+.product-card-image > button:active { transform: scale(.85); }
+
+.sm-tabs a { transition: background-color .2s ease, color .2s ease, border-color .2s ease; }
+.sm-grid3 { animation: sm-fade .35s ease; }
+
+.sm-banner, .sm-wide { transition: transform .25s ease, box-shadow .25s ease; }
+.sm-banner:hover, .sm-wide:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(16,42,90,.10); }
+.sm-banner-image img, .sm-wide-image img { transition: transform .35s ease; }
+.sm-banner:hover .sm-banner-image img, .sm-wide:hover .sm-wide-image img { transform: scale(1.06); }
+
+.sm-cats li a svg:last-child { transition: transform .2s ease; }
+.sm-cats li a:hover svg:last-child { transform: translateX(3px); }
+.sm-cats li a { transition: background-color .15s ease, color .15s ease; }
+.sm-best { transition: transform .2s ease; }
+.sm-best:hover { transform: translateX(3px); }
+.sm-services a { transition: transform .2s ease, background-color .2s ease; }
+.sm-services a:hover { transform: translateY(-2px); }
+.store-nav a, .sm-menu a { transition: color .15s ease; }
+
+.sm-badge-pop { animation: sm-pop .3s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes sm-pop { 0% { transform: scale(0); } 70% { transform: scale(1.25); } }
+
+/* ===== Categorias abaixo da hero ===== */
+.sm-catstrip { margin-top: 18px; }
+.sm-catstrip h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; color: #111; }
+.sm-catstrip-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.sm-cat { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 8px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; text-align: center; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.sm-cat:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(16,42,90,.08); border-color: #bfdbfe; }
+.sm-cat:active { transform: translateY(-1px) scale(.98); }
+.sm-cat-img { position: relative; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: #f4f6fa; display: grid; place-items: center; color: #1546b8; }
+.sm-cat-img img { object-fit: contain; padding: 7px; }
+.sm-cat > span:last-child { font-size: 11px; font-weight: 600; color: #374151; line-height: 1.25; }
+@media (max-width: 1023px) { .sm-catstrip-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .sm-catstrip-grid { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+  .sm-cat { flex: 0 0 auto; width: 94px; padding: 10px 6px; }
+  .sm-cat-img { width: 56px; height: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1; transform: none; transition: none; }
+  .sm-hero-copy > *, .sm-hero-image, .sm-badge-pop, .sm-grid3 { animation: none !important; }
+  .product-card, .product-card-image img, .sm-banner, .sm-wide, .sm-cat, .sm-best, .sm-services a { transition: none !important; }
+  .product-card:hover, .sm-banner:hover, .sm-wide:hover, .sm-cat:hover { transform: none; }
+}

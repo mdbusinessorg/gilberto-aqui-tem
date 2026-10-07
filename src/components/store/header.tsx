@@ -58,7 +58,7 @@ export function StoreHeader({ categories, user }: { categories: NavCategory[]; u
           </Link>
           <Link href="/carrinho" className="relative p-2 text-ink-soft hover:text-ink" aria-label="Carrinho">
             <ShoppingBag className="h-5 w-5" />
-            {hydrated && count > 0 && <span className="absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold text-white">{count}</span>}
+            {hydrated && count > 0 && <span key={count} className="sm-badge-pop absolute -right-0.5 -top-0.5 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] font-semibold text-white">{count}</span>}
           </Link>
         </div>
       </div>
