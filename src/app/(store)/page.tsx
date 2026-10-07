@@ -104,6 +104,12 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             <Link href="/" className="active">Início</Link><Link href="/loja">Loja</Link><Link href="/loja?promo=1">Promoções</Link><Link href="/trocas">Trocas</Link><Link href="/contacto">Contacto</Link>
           </nav>
 
+          <nav className="sm-catpills" aria-label="Categorias">
+            {categories.filter(c => !c.parent_id).map(c => { const Icon = CATEGORY_ICONS[c.slug] ?? Grid2X2; return (
+              <Link key={c.id} href={`/categoria/${c.slug}`}><span><Icon className="h-5 w-5" /></span><em>{c.name}</em></Link>
+            ) })}
+          </nav>
+
           <section className="sm-hero" aria-label="Destaque">
             <div className="sm-hero-copy">
               <h1>{banner?.title ?? heroPhone?.name ?? 'iPhone'}</h1>

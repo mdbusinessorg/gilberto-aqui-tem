@@ -285,7 +285,13 @@
 .sm-wide-image { position: relative; margin-left: auto; width: 260px; height: 130px; }
 .sm-brands { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; margin-top: 30px; padding-top: 22px; border-top: 1px solid #f1f3f6; font-size: 15px; font-weight: 800; color: #9ca3af; letter-spacing: -.02em; }
 .sm-brands a:hover { color: #1546b8; }
+.sm-catpills { display: none; }
 @media (max-width: 1023px) {
+  .sm-catpills { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .sm-catpills::-webkit-scrollbar { display: none; }
+  .sm-catpills a { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; width: 68px; text-align: center; }
+  .sm-catpills a > span { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1546b8, #3b7be8); color: #fff; box-shadow: 0 4px 10px rgba(21,70,184,.25); }
+  .sm-catpills a em { font-style: normal; font-size: 11px; font-weight: 600; color: #374151; line-height: 1.1; }
   .sm-layout { grid-template-columns: 1fr; }
   .sm-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; order: 2; }
   .sm-cats { grid-column: 1 / -1; }
