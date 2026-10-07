@@ -295,7 +295,8 @@
   .sm-catpills a > span { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: #f1f4fa; color: #1546b8; border: 1px solid #e4e9f4; }
   .sm-catpills a strong { font-size: 12px; font-weight: 600; color: #111; line-height: 1.15; }
   .sm-catpills a em { display: flex; align-items: center; gap: 2px; font-style: normal; font-size: 10px; color: #9ca3af; }
-  .sm-layout { grid-template-columns: 1fr; }
+  .sm-layout { grid-template-columns: minmax(0, 1fr); }
+  .sm-main { min-width: 0; }
   .sm-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; order: 2; }
   .sm-cats { grid-column: 1 / -1; }
   .sm-box, .sm-services { margin-top: 0; }
