@@ -1,6 +1,6 @@
 import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
-import { ChevronRight, ChevronLeft, Menu, Truck, ShieldCheck, RefreshCw, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
+import { ChevronRight, ArrowRight, Menu, Truck, ShieldCheck, RefreshCw, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
 import { ProductCard, ProductImage } from '@/components/store/product-card'
 import { Reveal } from '@/components/store/reveal'
 import { Stars } from '@/components/ui'
@@ -15,16 +15,7 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   iphone: Smartphone, samsung: Smartphone, android: Smartphone, laptops: Laptop, macbook: Laptop,
   playstation: Gamepad2, airpods: Headphones, 'apple-watch': Watch, acessorios: Cable, audio: Headphones,
 }
-const TABS = [
-  { key: 'novidades', label: 'Novidades' },
-  { key: 'destaques', label: 'Destaques' },
-  { key: 'promocoes', label: 'Promoções' },
-  { key: 'diversos', label: 'Diversos' },
-] as const
-type TabKey = (typeof TABS)[number]['key']
-
-export default async function HomePage({ searchParams }: { searchParams?: { aba?: string } }) {
-  const tab: TabKey = TABS.some(t => t.key === searchParams?.aba) ? (searchParams!.aba as TabKey) : 'novidades'
+export default async function HomePage() {
   const [recent, featured, promos, misc, popular, phones, audio, allProducts, categories, brands, banners] = await Promise.all([
     getProducts({ sort: 'recent', inStock: true, perPage: 3 }),
     getProducts({ featured: true, inStock: true, perPage: 3 }),
@@ -36,11 +27,14 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
     getProducts({ inStock: true, perPage: 96 }),
     getCategories(), getBrands(), getBanners(),
   ])
-  const tabProducts: Record<TabKey, typeof recent.products> = { novidades: recent.products, destaques: featured.products, promocoes: promos.products, diversos: misc.products }
-  const shown = tabProducts[tab].length ? tabProducts[tab] : recent.products
   const banner = banners[0]
   const heroImage = banner?.image_url || '/promotions/iphone-x-hero.webp'
   const heroPhone = phones.products.find(p => /iphone x/i.test(p.name ?? '')) ?? phones.products[0]
+  const novidades = allProducts.products.length ? allProducts.products.slice(0, 8) : recent.products
+  const destaques = allProducts.products.filter(p => p.is_featured)
+  const promocoes = allProducts.products.filter(p => p.is_promo || (p.promo_price && p.promo_price < (p.price ?? 0))).slice(0, 8)
+  const acessorios = allProducts.products.filter(p => ['acessorios', 'audio', 'outros', 'playstation'].includes(p.category_slug ?? '')).slice(0, 8)
+  const smartList = phones.products.length ? phones.products : allProducts.products.filter(p => ['iphone', 'samsung', 'android'].includes(p.category_slug ?? '')).slice(0, 4)
   const deal = promos.products[0]
   const best = (popular.products.some(p => (p.sold_count ?? 0) > 0) ? popular.products : featured.products).slice(0, 3)
   const topCategories = categories.filter(c => !c.parent_id)
@@ -109,12 +103,13 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
 
           <section className="sm-hero" aria-label="Destaque">
             <div className="sm-hero-copy">
-              <h1>{banner?.title ?? heroPhone?.name ?? 'iPhone'}</h1>
-              <p>{banner?.subtitle ?? 'Já disponível na Gilberto Aqui Tem'}</p>
-              <div><Link href={banner?.link_url ?? (heroPhone ? `/produto/${heroPhone.slug}` : '/loja')}>Saber mais</Link><span>|</span><Link href={heroPhone ? `/produto/${heroPhone.slug}` : '/loja'}>Comprar</Link></div>
+              <p className="sm-hero-eyebrow">Gilberto Aqui Tem</p>
+              <h1>{banner?.title ?? heroPhone?.name ?? 'Novidades'}</h1>
+              <p className="sm-hero-sub">{banner?.subtitle ?? 'Os melhores preços de Luanda'}</p>
+              <div><Link href={banner?.link_url ?? (heroPhone ? `/produto/${heroPhone.slug}` : '/loja')} className="sm-hero-cta">{banner?.cta_label ?? 'Comprar agora'}</Link></div>
             </div>
-            <Image src={heroImage} alt="" fill priority sizes="(max-width: 1023px) 100vw, 820px" className="sm-hero-image" />
-            <div className="sm-dots"><i className="on" /><i /></div>
+            <div className="sm-hero-media"><Image src={heroImage} alt="" fill priority sizes="(max-width: 767px) 60vw, 420px" /></div>
+            {banner && heroPhone && <Link href={`/produto/${heroPhone.slug}`} className="sm-hero-alt">Ver {heroPhone.name} <ArrowRight className="h-3 w-3" /></Link>}
           </section>
 
           {topCategories.length > 0 && (
@@ -141,13 +136,12 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             </Reveal>
           )}
 
-          <Reveal>
-          <div className="sm-tabs">
-            <div>{TABS.map(t => <Link key={t.key} href={t.key === 'novidades' ? '/#tabs' : `/?aba=${t.key}#tabs`} className={t.key === tab ? 'active' : ''} id={t.key === tab ? 'tabs' : undefined}>{t.label}</Link>)}</div>
-            <div className="sm-arrows"><Link href="/loja" aria-label="Ver loja"><ChevronLeft className="h-3.5 w-3.5" /></Link><Link href="/loja" aria-label="Ver loja"><ChevronRight className="h-3.5 w-3.5" /></Link></div>
-          </div>
-          <div className="sm-grid3" key={tab}>{shown.map(p => <ProductCard key={p.id} p={p} />)}</div>
-          </Reveal>
+          {novidades.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Novidades</h2><Link href="/loja?ordem=recent">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{novidades.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
 
           <Reveal>
           <div className="sm-banners">
@@ -156,10 +150,10 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
           </div>
           </Reveal>
 
-          {phones.products.length > 0 && (
+          {smartList.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Smartphones</h2><Link href="/loja?categoria=iphone">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid2">{phones.products.map(p => <ProductCard key={p.id} p={p} horizontal compact />)}</div>
+              <div className="sm-grid2">{smartList.map(p => <ProductCard key={p.id} p={p} horizontal compact />)}</div>
             </section></Reveal>
           )}
 
@@ -171,10 +165,24 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
             </Link></Reveal>
           )}
 
-          {(misc.products.length > 0 || audio.products.length > 0) && (
+          {destaques.length > 0 && (
             <Reveal><section className="sm-section">
-              <div className="sm-heading"><h2>Diversos</h2><Link href="/loja">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{(misc.products.length ? misc.products : audio.products).slice(0, 4).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-heading"><h2>Destaques</h2><Link href="/loja">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{destaques.slice(0, 8).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
+          {promocoes.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Em promoção</h2><Link href="/loja?promo=1">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{promocoes.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
+          {(acessorios.length > 0 || misc.products.length > 0 || audio.products.length > 0) && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Acessórios e diversos</h2><Link href="/loja?categoria=acessorios">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{(acessorios.length ? acessorios : (misc.products.length ? misc.products : audio.products)).slice(0, 8).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
             </section></Reveal>
           )}
 
