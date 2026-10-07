@@ -241,7 +241,13 @@
 .sm-services p { font-size: 10px; color: #6b7280; }
 .sm-menu { display: none; gap: 22px; padding: 10px 0 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #374151; }
 .sm-menu a.active, .sm-menu a:hover { color: #1546b8; }
-.sm-hero { position: relative; display: flex; align-items: center; min-height: 300px; overflow: hidden; border-radius: 16px; background: #f1f2f4; color: #111; }
+.sm-hero { position: relative; min-height: 300px; overflow: hidden; border-radius: 16px; color: #111; }
+.sm-hero-slide { position: absolute; inset: 0; display: flex; align-items: center; opacity: 0; pointer-events: none; transition: opacity .8s ease; }
+.sm-hero-slide.on { opacity: 1; pointer-events: auto; }
+.sm-hero-nav { position: absolute; left: 44px; bottom: 16px; z-index: 2; display: flex; gap: 6px; }
+.sm-hero-nav button { width: 6px; height: 6px; border-radius: 999px; background: rgba(0,0,0,.18); transition: width .3s ease, background .3s ease; }
+.sm-hero-nav button.on { width: 16px; background: #111; }
+@media (max-width: 767px) { .sm-hero-nav { left: 20px; bottom: 12px; } }
 .sm-hero-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #6b7280; margin-bottom: 10px; }
 .sm-hero-copy { position: relative; z-index: 1; padding: 40px 0 40px 44px; width: 52%; }
 .sm-hero h1 { font-size: clamp(26px, 4vw, 42px); font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: #111; }
@@ -599,7 +605,8 @@ body:has(.pd-page) .wa-float { display: none; }
 /* Imagens dos cards sobre fundo claro (estilo app) */
 .sm-grid4 .product-card, .sm-grid3 .product-card, .sm-grid2 .product-card { border-radius: 12px; border: 0; overflow: hidden; }
 .sm-grid4 .product-card + .product-card, .sm-grid3 .product-card + .product-card { border-left: 0; margin-left: 0; }
-.sm-grid4 .product-card-image { background: #f4f4f6; border-radius: 12px; margin: 8px; }
+.sm-grid4 .product-card-image { background: #fff; border-radius: 12px 12px 0 0; margin: 0; }
+.sm-grid4 .product-card-image img { object-fit: cover; }
 .sm-grid4 { gap: 14px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1023px) { .sm-grid4 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 767px) { .sm-grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }

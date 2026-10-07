@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { ChevronRight, ArrowRight, Menu, Truck, ShieldCheck, RefreshCw, Smartphone, Laptop, Gamepad2, Headphones, Watch, Cable, Grid2X2 } from 'lucide-react'
 import { ProductCard, ProductImage } from '@/components/store/product-card'
 import { Reveal } from '@/components/store/reveal'
+import { HeroSlider } from '@/components/store/hero-slider'
 import { Stars } from '@/components/ui'
 import { getProducts, getCategories, getBrands, getBanners } from '@/lib/store/queries'
 import { priceOf } from '@/lib/store/price'
@@ -35,8 +36,9 @@ export default async function HomePage() {
     getProducts({ inStock: true, perPage: 96 }),
     getCategories(), getBrands(), getBanners(),
   ])
-  const banner = banners[0]
-  const heroImage = banner?.image_url || '/promotions/iphone-x-hero.webp'
+  const slides = banners.length
+    ? banners.map(b => ({ title: b.title ?? '', sub: b.subtitle, cta: b.cta_label, href: b.link_url ?? '/loja', image: b.image_url }))
+    : [{ title: 'Novidades', sub: 'Os melhores preços de Luanda', cta: 'Comprar agora', href: '/loja', image: phones.products[0]?.image_url ?? '/promotions/iphone-x-hero.webp' }]
   const heroPhone = phones.products.find(p => /iphone x/i.test(p.name ?? '')) ?? phones.products[0]
   const byCat = (slugs: string[], n = 4) => allProducts.products.filter(p => slugs.includes(p.category_slug ?? '')).slice(0, n)
   const destaques = allProducts.products.filter(p => p.is_featured).slice(0, 4)
@@ -113,16 +115,7 @@ export default async function HomePage() {
             <Link href="/" className="active">Início</Link><Link href="/loja">Loja</Link><Link href="/loja?promo=1">Promoções</Link><Link href="/trocas">Trocas</Link><Link href="/contacto">Contacto</Link>
           </nav>
 
-          <section className="sm-hero" aria-label="Destaque">
-            <div className="sm-hero-copy">
-              <p className="sm-hero-eyebrow">Gilberto Aqui Tem</p>
-              <h1>{banner?.title ?? heroPhone?.name ?? 'Novidades'}</h1>
-              <p className="sm-hero-sub">{banner?.subtitle ?? 'Os melhores preços de Luanda'}</p>
-              <div><Link href={banner?.link_url ?? (heroPhone ? `/produto/${heroPhone.slug}` : '/loja')} className="sm-hero-cta">{banner?.cta_label ?? 'Comprar agora'}</Link></div>
-            </div>
-            <div className="sm-hero-media"><Image src={heroImage} alt="" fill priority sizes="(max-width: 767px) 60vw, 420px" /></div>
-            {banner && heroPhone && <Link href={`/produto/${heroPhone.slug}`} className="sm-hero-alt">Ver {heroPhone.name} <ArrowRight className="h-3 w-3" /></Link>}
-          </section>
+          <HeroSlider slides={slides} />
 
           <Reveal>
             <section className="sm-cats3" aria-label="Categorias principais">
