@@ -14,7 +14,15 @@ export const revalidate = 60
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   iphone: Smartphone, samsung: Smartphone, android: Smartphone, laptops: Laptop, macbook: Laptop,
   playstation: Gamepad2, airpods: Headphones, 'apple-watch': Watch, acessorios: Cable, audio: Headphones,
+  monitores: Laptop, informatica: Laptop,
 }
+
+const MAIN_CATS = [
+  { name: 'Smartphones', img: '/categorias/smartphones.webp', href: '/loja?categoria=iphone', desc: 'iPhone, Samsung e mais' },
+  { name: 'Monitores & Visuais', img: '/categorias/monitores.webp', href: '/categoria/monitores', desc: 'Monitores, visores e projetores' },
+  { name: 'Informática', img: '/categorias/informatica.webp', href: '/categoria/informatica', desc: 'Portáteis, impressoras e rede' },
+  { name: 'Acessórios', img: '/categorias/acessorios.webp', href: '/categoria/acessorios', desc: 'Áudio, cabos e gadgets' },
+]
 export default async function HomePage() {
   const [recent, featured, promos, misc, popular, phones, audio, allProducts, categories, brands, banners] = await Promise.all([
     getProducts({ sort: 'recent', inStock: true, perPage: 3 }),
@@ -30,11 +38,15 @@ export default async function HomePage() {
   const banner = banners[0]
   const heroImage = banner?.image_url || '/promotions/iphone-x-hero.webp'
   const heroPhone = phones.products.find(p => /iphone x/i.test(p.name ?? '')) ?? phones.products[0]
-  const novidades = allProducts.products.length ? allProducts.products.slice(0, 8) : recent.products
-  const destaques = allProducts.products.filter(p => p.is_featured)
-  const promocoes = allProducts.products.filter(p => p.is_promo || (p.promo_price && p.promo_price < (p.price ?? 0))).slice(0, 8)
-  const acessorios = allProducts.products.filter(p => ['acessorios', 'audio', 'outros', 'playstation'].includes(p.category_slug ?? '')).slice(0, 8)
-  const smartList = phones.products.length ? phones.products : allProducts.products.filter(p => ['iphone', 'samsung', 'android'].includes(p.category_slug ?? '')).slice(0, 4)
+  const byCat = (slugs: string[], n = 4) => allProducts.products.filter(p => slugs.includes(p.category_slug ?? '')).slice(0, n)
+  const destaques = allProducts.products.filter(p => p.is_featured).slice(0, 4)
+  const smartphones = byCat(['iphone', 'samsung', 'android'])
+  const monitores = byCat(['monitores'])
+  const informatica = byCat(['informatica', 'laptops', 'macbook', 'tablets'])
+  const somEGaming = byCat(['audio', 'playstation', 'airpods', 'apple-watch'])
+  const acessorios = byCat(['acessorios', 'outros'])
+  const promocoes = allProducts.products.filter(p => p.is_promo || (p.promo_price && p.promo_price < (p.price ?? 0))).slice(0, 4)
+  const smartList = smartphones
   const deal = promos.products[0]
   const best = (popular.products.some(p => (p.sold_count ?? 0) > 0) ? popular.products : featured.products).slice(0, 3)
   const topCategories = categories.filter(c => !c.parent_id)
@@ -112,36 +124,20 @@ export default async function HomePage() {
             {banner && heroPhone && <Link href={`/produto/${heroPhone.slug}`} className="sm-hero-alt">Ver {heroPhone.name} <ArrowRight className="h-3 w-3" /></Link>}
           </section>
 
-          {topCategories.length > 0 && (
-            <Reveal>
-              <section className="sm-catstrip" aria-label="Comprar por categoria">
-                <h2>Comprar por categoria</h2>
-                <div className="sm-catstrip-grid">
-                  {topCategories.map(c => {
-                    const Icon = CATEGORY_ICONS[c.slug] ?? Grid2X2
-                    const img = catImage(c.slug)
-                    return (
-                      <Link key={c.id} href={`/categoria/${c.slug}`} className="sm-cat">
-                        <span className="sm-cat-img">
-                          {img
-                            ? <Image src={img} alt="" fill sizes="72px" />
-                            : <Icon className="h-6 w-6" />}
-                        </span>
-                        <span>{c.name}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </section>
-            </Reveal>
-          )}
-
-          {novidades.length > 0 && (
-            <Reveal><section className="sm-section">
-              <div className="sm-heading"><h2>Novidades</h2><Link href="/loja?ordem=recent">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{novidades.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
-            </section></Reveal>
-          )}
+          <Reveal>
+            <section className="sm-cats3" aria-label="Categorias principais">
+              <div className="sm-heading"><h2>Categorias</h2><Link href="/loja">Ver todas <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-cats3-grid">
+                {MAIN_CATS.map(c => (
+                  <Link key={c.name} href={c.href} className="sm-cat3">
+                    <span className="sm-cat3-img"><Image src={c.img} alt="" fill sizes="(max-width: 640px) 64px, 96px" /></span>
+                    <span className="sm-cat3-txt"><strong>{c.name}</strong><small>{c.desc}</small></span>
+                    <ChevronRight className="h-4 w-4 sm-cat3-arrow" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </Reveal>
 
           <Reveal>
           <div className="sm-banners">
@@ -150,10 +146,38 @@ export default async function HomePage() {
           </div>
           </Reveal>
 
+          {destaques.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Destaques</h2><Link href="/loja?destaques=1">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{destaques.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
           {smartList.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Smartphones</h2><Link href="/loja?categoria=iphone">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid2">{smartList.map(p => <ProductCard key={p.id} p={p} horizontal compact />)}</div>
+              <div className="sm-grid4">{smartList.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
+          {monitores.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Monitores & Visuais</h2><Link href="/categoria/monitores">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{monitores.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
+          {informatica.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Informática</h2><Link href="/categoria/informatica">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{informatica.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+            </section></Reveal>
+          )}
+
+          {somEGaming.length > 0 && (
+            <Reveal><section className="sm-section">
+              <div className="sm-heading"><h2>Áudio & PlayStation</h2><Link href="/categoria/audio">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{somEGaming.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
             </section></Reveal>
           )}
 
@@ -165,10 +189,10 @@ export default async function HomePage() {
             </Link></Reveal>
           )}
 
-          {destaques.length > 0 && (
+          {acessorios.length > 0 && (
             <Reveal><section className="sm-section">
-              <div className="sm-heading"><h2>Destaques</h2><Link href="/loja">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{destaques.slice(0, 8).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-heading"><h2>Acessórios</h2><Link href="/categoria/acessorios">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
+              <div className="sm-grid4">{acessorios.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
             </section></Reveal>
           )}
 
@@ -176,13 +200,6 @@ export default async function HomePage() {
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Em promoção</h2><Link href="/loja?promo=1">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
               <div className="sm-grid4">{promocoes.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
-            </section></Reveal>
-          )}
-
-          {(acessorios.length > 0 || misc.products.length > 0 || audio.products.length > 0) && (
-            <Reveal><section className="sm-section">
-              <div className="sm-heading"><h2>Acessórios e diversos</h2><Link href="/loja?categoria=acessorios">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{(acessorios.length ? acessorios : (misc.products.length ? misc.products : audio.products)).slice(0, 8).map(p => <ProductCard key={p.id} p={p} compact />)}</div>
             </section></Reveal>
           )}
 
