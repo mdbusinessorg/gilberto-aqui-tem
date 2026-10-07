@@ -249,6 +249,8 @@
 .sm-hero-copy > div { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 12px; font-weight: 600; }
 .sm-hero-copy > div span { opacity: .6; }
 .sm-hero-copy > div a:hover { text-decoration: underline; }
+@keyframes sm-fadeup { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.storefront { overflow-x: clip; }
 .sm-dots { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 6px; }
 .sm-dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.5); }
 .sm-dots i.on { background: #fff; }
@@ -287,11 +289,12 @@
 .sm-brands a:hover { color: #1546b8; }
 .sm-catpills { display: none; }
 @media (max-width: 1023px) {
-  .sm-catpills { display: flex; gap: 10px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .sm-catpills { display: flex; gap: 14px; overflow-x: auto; padding: 6px 2px 12px; margin-bottom: 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .sm-catpills::-webkit-scrollbar { display: none; }
-  .sm-catpills a { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; width: 68px; text-align: center; }
-  .sm-catpills a > span { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #1546b8, #3b7be8); color: #fff; box-shadow: 0 4px 10px rgba(21,70,184,.25); }
-  .sm-catpills a em { font-style: normal; font-size: 11px; font-weight: 600; color: #374151; line-height: 1.1; }
+  .sm-catpills a { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; width: 76px; text-align: center; }
+  .sm-catpills a > span { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 50%; background: #f1f4fa; color: #1546b8; border: 1px solid #e4e9f4; }
+  .sm-catpills a strong { font-size: 12px; font-weight: 600; color: #111; line-height: 1.15; }
+  .sm-catpills a em { display: flex; align-items: center; gap: 2px; font-style: normal; font-size: 10px; color: #9ca3af; }
   .sm-layout { grid-template-columns: 1fr; }
   .sm-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; order: 2; }
   .sm-cats { grid-column: 1 / -1; }
@@ -302,8 +305,16 @@
 @media (max-width: 767px) {
   .sm-side { grid-template-columns: 1fr; }
   .sm-cats, .sm-deal, .sm-services { display: none; }
-  .sm-hero { height: 220px; }
-  .sm-hero-copy { padding: 26px 20px; max-width: 65%; }
+  .sm-hero { height: 200px; }
+  .sm-hero-copy { padding: 24px 18px; max-width: 62%; }
+  .sm-hero-copy > p { font-size: 12px; }
+  .sm-hero-image { object-position: right 6% center; }
+  .sm-hero-copy > * { animation: sm-fadeup .5s ease both; }
+  .sm-hero-copy > p { animation-delay: .08s; }
+  .sm-hero-copy > div { animation-delay: .16s; }
+  .sm-home .product-card-image img { padding: 10px; }
+  .sm-grid3 .product-card-body, .sm-grid4 .product-card-body { padding: 10px 8px; }
+  .sm-banner-image { width: 96px; height: 78px; }
   .sm-tabs { flex-direction: column; align-items: flex-start; gap: 8px; }
   .sm-tabs > div:first-child { flex-wrap: wrap; }
   .sm-arrows { display: none; }

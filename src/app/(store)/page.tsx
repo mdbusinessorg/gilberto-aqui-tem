@@ -106,7 +106,7 @@ export default async function HomePage({ searchParams }: { searchParams?: { aba?
 
           <nav className="sm-catpills" aria-label="Categorias">
             {categories.filter(c => !c.parent_id).map(c => { const Icon = CATEGORY_ICONS[c.slug] ?? Grid2X2; return (
-              <Link key={c.id} href={`/categoria/${c.slug}`}><span><Icon className="h-5 w-5" /></span><em>{c.name}</em></Link>
+              <Link key={c.id} href={`/categoria/${c.slug}`}><span><Icon className="h-6 w-6" /></span><strong>{c.name}</strong><em>Ver produtos <ChevronRight className="h-3 w-3" /></em></Link>
             ) })}
           </nav>
 
