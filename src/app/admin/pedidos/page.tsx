@@ -1,9 +1,9 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader, Card, Table, THead, TBody, StatusBadge, EmptyState, Input, Select, Button } from '@/components/ui'
 import { formatKz, formatDateTime } from '@/lib/utils'
 import { ORDER_STATUS, PAYMENT_STATUS, CHANNEL_LABELS } from '@/lib/labels'
-import type { OrderStatus, PaymentStatus } from '@/lib/labels'
+import type { OrderStatus, PaymentStatus, OrderChannel } from '@/lib/labels'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +11,9 @@ export default async function OrdersPage({ searchParams }: { searchParams: Recor
   const supabase = createClient()
   let q = supabase.from('orders').select('id,order_number,customer_name,customer_phone,total,status,payment_status,channel,created_at').order('created_at', { ascending: false }).limit(100)
   if (searchParams.estado) q = q.eq('status', searchParams.estado as OrderStatus)
+  if (searchParams.canal) q = q.eq('channel', searchParams.canal as OrderChannel)
+  if (searchParams.de) q = q.gte('created_at', `${searchParams.de}T00:00:00`)
+  if (searchParams.ate) q = q.lte('created_at', `${searchParams.ate}T23:59:59`)
   if (searchParams.q) {
     const t = searchParams.q.replace(/[%_,()]/g, ' ')
     q = q.or(`order_number.ilike.%${t}%,customer_name.ilike.%${t}%,customer_phone.ilike.%${t}%`)
@@ -26,6 +29,12 @@ export default async function OrdersPage({ searchParams }: { searchParams: Recor
             <option value="">Todos os estados</option>
             {Object.entries(ORDER_STATUS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </Select>
+          <Select name="canal" defaultValue={searchParams.canal ?? ''} className="w-40">
+            <option value="">Todos os canais</option>
+            {Object.entries(CHANNEL_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </Select>
+          <Input type="date" name="de" defaultValue={searchParams.de} className="w-40" />
+          <Input type="date" name="ate" defaultValue={searchParams.ate} className="w-40" />
           <Button type="submit" variant="outline">Filtrar</Button>
         </form>
         <Table>

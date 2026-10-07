@@ -21,7 +21,7 @@ export default async function TradesPage({ searchParams }: { searchParams: Recor
             {(trades ?? []).map((t) => (
               <tr key={t.id}>
                 <td><p className="font-medium">{t.name}</p><p className="text-xs text-ink-muted">{t.phone}</p></td>
-                <td>{t.brand} {t.model}{t.storage ? ` · ${t.storage}` : ''}</td>
+                <td>{t.brand} {t.model}{t.storage ? ` · ${t.storage}` : ''}{t.photos.length > 0 && <p className="text-xs text-ink-muted">{t.photos.length} fotografia(s)</p>}</td>
                 <td className="text-xs text-ink-muted">{t.condition ?? '—'}{t.accessories ? ` · ${t.accessories}` : ''}</td>
                 <td className="tabular">{t.battery_health != null ? `${t.battery_health}%` : '—'}</td>
                 <td className="tabular text-ink-muted">{t.expected_value ? formatKz(t.expected_value) : '—'}</td>

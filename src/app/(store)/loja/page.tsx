@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProducts, getCategories, getBrands, type ProductFilters, type StorefrontProduct } from '@/lib/store/queries'
 import { priceOf } from '@/lib/store/price'

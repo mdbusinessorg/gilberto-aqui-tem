@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
 import { getProducts, getCategories } from '@/lib/store/queries'
 import { ProductGrid } from '@/components/store/product-card'

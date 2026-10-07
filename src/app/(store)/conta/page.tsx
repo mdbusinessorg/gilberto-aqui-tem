@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@/components/ui/navigation-link'
 import { redirect } from 'next/navigation'
 import { Package, Heart, RefreshCw } from 'lucide-react'
 import { getSessionProfile, createClient } from '@/lib/supabase/server'
@@ -10,6 +10,9 @@ import { getPublicSettings, type StorefrontProduct } from '@/lib/store/queries'
 import { SignOutButton } from './sign-out'
 import { WheelSection } from './wheel'
 import { RedeemCard } from './redeem'
+import { ClockCamera } from '@/components/admin/clock-camera'
+import { STAFF_ROLES } from '@/lib/labels'
+import { todayISO } from '@/lib/utils'
 
 export const metadata = { title: 'A minha conta' }
 export const dynamic = 'force-dynamic'
@@ -29,6 +32,9 @@ export default async function AccountPage() {
     supabase.from('trade_requests').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(10),
   ])
 
+  const isStaff = STAFF_ROLES.includes(profile.role)
+  const { data: employee } = isStaff ? await supabase.from('employees').select('id,full_name,department,schedule_start,schedule_end').eq('profile_id', user.id).maybeSingle() : { data: null }
+  const { data: todayAtt } = employee ? await supabase.from('attendance').select('*').eq('employee_id', employee.id).eq('work_date', todayISO()).maybeSingle() : { data: null }
   const tier = (customer?.tier ?? 'bronze') as keyof typeof TIER
   const points = customer?.loyalty_points ?? 0
 
@@ -41,6 +47,16 @@ export default async function AccountPage() {
         </div>
         <SignOutButton />
       </div>
+
+      {employee && (
+        <Card className="mb-6 border-brand-200 bg-brand-50/40 p-5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div><h2 className="text-base font-semibold">Registo de ponto</h2><p className="text-xs text-ink-muted">{employee.department} · horário {String(employee.schedule_start).slice(0, 5)}–{String(employee.schedule_end).slice(0, 5)} · só tu e a gestão vêem este registo</p></div>
+            <Link href="/admin/pontualidade" className="text-sm font-medium text-brand-700">Ver o meu histórico</Link>
+          </div>
+          <ClockCamera employeeId={employee.id} today={todayAtt} />
+        </Card>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="p-4"><p className="text-xs text-ink-muted">Pontos de fidelidade</p><p className="mt-1 text-2xl font-semibold tabular">{points}</p></Card>
