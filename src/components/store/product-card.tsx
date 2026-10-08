@@ -44,7 +44,7 @@ export function ProductCard({ p, compact, horizontal, actions }: { p: Storefront
   return (
     <Link href={`/produto/${p.slug}`} className={cn('product-card group flex flex-col border border-line bg-white transition-colors hover:border-brand-200', horizontal && 'product-card-horizontal')}>
       <div className="product-card-image relative aspect-square overflow-hidden">
-        <ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-4" sizes={horizontal ? '(max-width: 640px) 30vw, 140px' : '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px'} />
+        <ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-2" sizes={horizontal ? '(max-width: 640px) 30vw, 140px' : '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px'} />
         {actions && p.category_name && <span className="product-card-tag">{p.category_name}</span>}
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1">
           {price.active && <Badge tone="red">-{price.discount}%</Badge>}

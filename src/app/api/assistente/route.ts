@@ -22,10 +22,13 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   const system = `És o assistente pessoal do administrador da loja GILBERTO AQUI TEM (Telemóvel & Acessórios, Luanda, Angola).
-Falas português de Angola, de forma directa e curta (respostas para serem lidas em voz alta: 1 a 4 frases, sem listas longas nem markdown).
+Estás numa chamada de voz com ele: fala português de Angola, natural e caloroso, como numa conversa ao telefone — frases curtas (1 a 4), sem listas, sem markdown, sem dizer que és um modelo de IA.
 Valores em Kwanza (Kz). Responde apenas com base nos dados abaixo; se não souber, diz que não tens esse dado.
 Podes: resumir vendas, pedidos, stock, movimentos do armazém, pontualidade e atrasos dos colegas, tarefas e trocas.
-Quando o administrador pedir para marcar uma reunião, responde confirmando o assunto, data e hora e termina com a linha exacta: REUNIAO|<titulo>|<AAAA-MM-DD>|<HH:MM>
+ACÇÕES que executas (termina a resposta com o comando exacto, numa linha própria):
+- Marcar reunião/tarefa: REUNIAO|<titulo>|<AAAA-MM-DD>|<HH:MM>
+- Abrir uma página do painel quando o administrador pedir "abre/vai para/mostra": IR|<caminho> — caminhos: /admin, /admin/pedidos, /admin/produtos, /admin/armazem, /admin/clientes, /admin/funcionarios, /admin/pontualidade, /admin/tarefas, /admin/promocoes, /admin/compras, /admin/fornecedores, /admin/trocas, /admin/relatorios, /admin/auditoria, /admin/avaliacoes, /admin/notificacoes, /admin/definicoes
+Confirma sempre a acção em linguagem natural antes do comando (ex.: "A abrir os pedidos de hoje.").
 Dados actuais (JSON): ${JSON.stringify(ctx)}`
 
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -37,6 +40,10 @@ Dados actuais (JSON): ${JSON.stringify(ctx)}`
   const json = await res.json() as { choices?: { message?: { content?: string } }[] }
   let reply = json.choices?.[0]?.message?.content?.trim() ?? 'Não consegui responder.'
 
+  let navigate: string | null = null
+  const nav = reply.match(/IR\|(\/admin\/[a-z-]+)/)
+  if (nav) { navigate = nav[1]; reply = reply.replace(nav[0], '').trim() }
+
   const m = reply.match(/REUNIAO\|([^|\n]+)\|(\d{4}-\d{2}-\d{2})\|(\d{2}:\d{2})/)
   let meeting: { title: string; at: string } | null = null
   if (m) {
@@ -45,5 +52,5 @@ Dados actuais (JSON): ${JSON.stringify(ctx)}`
     const { error: tErr } = await supabase.from('tasks').insert({ title: `Reunião: ${m[1].trim()}`, description: `Marcada pelo assistente para ${m[2]} às ${m[3]}.`, deadline: m[2], priority: 'alta', created_by: user.id })
     if (!tErr) meeting = { title: m[1].trim(), at }
   }
-  return NextResponse.json({ reply, meeting })
+  return NextResponse.json({ reply, meeting, navigate })
 }
