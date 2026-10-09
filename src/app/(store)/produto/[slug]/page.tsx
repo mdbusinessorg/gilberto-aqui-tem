@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
-import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
-import { ShieldCheck, BadgeCheck } from 'lucide-react'
-import { getProductBySlug }  from '@/lib/store/queries'
-import { ProductGrid, ProductImage } from '@/components/store/product-card'
+import { ShieldCheck, BadgeCheck, Palette, BatteryFull, HardDrive, Package } from 'lucide-react'
+import { getProductBySlug } from '@/lib/store/queries'
+import { ProductGrid } from '@/components/store/product-card'
 import { Stars } from '@/components/ui'
+import { Reveal } from '@/components/store/reveal'
 import { priceOf } from '@/lib/store/price'
 import { CONDITION } from '@/lib/labels'
+import { WHATSAPP_DISPLAY } from '@/lib/whatsapp'
 import { ProductBuyBox } from './buy-box'
 import { ProductGallery } from './gallery'
+import { Faq } from './faq'
 
 export const revalidate = 60
 
@@ -23,6 +25,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const { product: p, images, reviews, related } = res
   const price = priceOf(p)
   const specs = (p.specs ?? {}) as Record<string, string>
+  const out = (p.stock_total ?? 0) <= 0
 
   const features: [string, string][] = ([
     [p.storage, 'Armazenamento'], [p.ram, 'Memória RAM'], [p.color, 'Cor'],
@@ -30,78 +33,133 @@ export default async function ProductPage({ params }: { params: { slug: string }
     [p.warranty_months ? `${p.warranty_months} meses` : null, 'Garantia incluída'],
     [p.condition ? CONDITION[p.condition]?.label : null, 'Condição do aparelho'],
     [p.model, 'Modelo'],
-    ...Object.entries(specs).map(([k, v]) => [String(v), k]),
-  ] as [string | null | undefined, string][]).filter((f): f is [string, string] => !!f[0]).slice(0, 5)
+  ] as [string | null | undefined, string][]).filter((f): f is [string, string] => !!f[0]).slice(0, 6)
   const tag = price.active ? `-${price.discount}%` : p.condition ? CONDITION[p.condition]?.label ?? null : null
+
+  const benefits: { icon: React.ReactNode; title: string; sub: string }[] = [
+    p.warranty_months ? { icon: <ShieldCheck className="h-5 w-5" />, title: 'Garantia incluída', sub: `${p.warranty_months} meses de garantia da loja` } : null,
+    p.condition ? { icon: <BadgeCheck className="h-5 w-5" />, title: 'Estado verificado', sub: `Condição: ${CONDITION[p.condition]?.label ?? p.condition}` } : null,
+    p.storage || p.ram ? { icon: <HardDrive className="h-5 w-5" />, title: 'Desempenho', sub: [p.storage, p.ram].filter(Boolean).join(' · ') } : null,
+    p.battery_health != null ? { icon: <BatteryFull className="h-5 w-5" />, title: 'Bateria saudável', sub: `Saúde da bateria: ${p.battery_health}%` } : null,
+    p.color ? { icon: <Palette className="h-5 w-5" />, title: 'Cor', sub: p.color } : null,
+  ].filter((b): b is NonNullable<typeof b> => !!b).slice(0, 4)
+  if (benefits.length === 0) benefits.push({ icon: <Package className="h-5 w-5" />, title: 'Produto original', sub: 'Verificado pela equipa Gilberto Aqui Tem' })
+
+  const specRows: [string, string][] = ([
+    ['Marca', p.brand_name], ['Modelo', p.model], ['Armazenamento', p.storage], ['Memória RAM', p.ram],
+    ['Cor', p.color], ['Condição', p.condition ? CONDITION[p.condition]?.label : null],
+    ['Garantia', p.warranty_months ? `${p.warranty_months} meses` : null],
+    ['Referência', p.sku],
+    ...Object.entries(specs) as [string, string][],
+  ] as [string, string | null | undefined][]).filter((r): r is [string, string] => !!r[1])
+
+  const faqItems = [
+    { q: 'Qual é o estado deste produto?', a: p.condition ? `Este produto está em condição: ${CONDITION[p.condition]?.label ?? p.condition}. Todas as unidades são verificadas pela nossa equipa antes de serem publicadas.` : 'Todos os produtos são verificados pela nossa equipa antes de serem publicados na loja.' },
+    { q: 'O produto está disponível?', a: out ? 'Este produto está esgotado de momento. Fala connosco no WhatsApp para reservar ou ser avisado quando voltar.' : `Sim — temos ${p.stock_total} ${p.stock_total === 1 ? 'unidade disponível' : 'unidades disponíveis'} para compra imediata.` },
+    { q: 'Como funciona a entrega?', a: 'Podes levantar na nossa loja em Luanda ou escolher entrega ao domicílio no checkout. Se preferires, combina a entrega directamente connosco no WhatsApp.' },
+    { q: 'Quais são as formas de pagamento?', a: 'Aceitamos transferência bancária, Multicaixa Express e dinheiro na entrega. O pagamento é combinado e confirmado na finalização do pedido.' },
+    { q: 'O produto tem garantia?', a: p.warranty_months ? `Sim — este produto inclui ${p.warranty_months} meses de garantia da loja.` : 'Fala connosco no WhatsApp para conhecer as condições de garantia deste produto.' },
+    { q: 'Como posso contactar a loja?', a: `Podes falar connosco a qualquer momento pelo WhatsApp: ${WHATSAPP_DISPLAY}. Respondemos rápido durante o horário comercial.` },
+  ]
+
+  const shortDesc = p.description ? p.description.split('\n')[0].slice(0, 160) : null
 
   return (
     <div className="shell pd-page">
-      <div className="pd-card">
-        <div className="grid lg:grid-cols-2 lg:gap-10">
+      <div className="pd-hero-card">
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
           <ProductGallery images={images} fallback={p.image_url} name={p.name ?? ''} brand={p.brand_name ?? null} tag={tag} productId={p.id!} slug={p.slug!} />
           <div className="pd-body">
-            {(p.rating_count ?? 0) > 0 && (
-              <a href="#avaliacoes" className="pd-rating">
-                <Stars value={Number(p.rating_avg)} size="md" />
-                <span>{Number(p.rating_avg).toFixed(1)} · {p.rating_count} avaliações</span>
-              </a>
-            )}
+            <h1 className="pd-name">{p.name}</h1>
+            <div className="pd-meta">
+              {(p.rating_count ?? 0) > 0 ? (
+                <a href="#avaliacoes" className="pd-rating">
+                  <Stars value={Number(p.rating_avg)} size="md" />
+                  <span>{Number(p.rating_avg).toFixed(1)} · {p.rating_count} avaliações</span>
+                </a>
+              ) : <span className="pd-rating"><Stars value={0} size="md" /><span>Sem avaliações ainda</span></span>}
+            </div>
+            {shortDesc && <p className="pd-lead">{shortDesc}</p>}
             <ProductBuyBox p={p} features={features} />
-            {p.warranty_months ? (
-              <div className="pd-warranty"><ShieldCheck className="h-4 w-4" /> Garantia de {p.warranty_months} meses incluída.</div>
-            ) : null}
           </div>
         </div>
       </div>
 
-      {(p.description || Object.keys(specs).length > 0) && (
-        <div className="mt-12 grid gap-10 lg:grid-cols-3">
-          {p.description && (
-            <div className="lg:col-span-2">
-              <h2 className="text-lg font-semibold">Descrição</h2>
-              <div className="prose-sm mt-3 whitespace-pre-line text-ink-soft leading-relaxed">{p.description}</div>
-            </div>
-          )}
-          {Object.keys(specs).length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold">Especificações</h2>
-              <dl className="mt-3 divide-y divide-line rounded-lg border border-line text-sm">
-                {Object.entries(specs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 px-4 py-2.5"><dt className="text-ink-muted">{k}</dt><dd className="font-medium text-right">{String(v)}</dd></div>
-                ))}
-              </dl>
-            </div>
-          )}
-        </div>
-      )}
-
-      <section id="avaliacoes" className="mt-12">
-        <h2 className="text-lg font-semibold">Avaliações ({reviews.length})</h2>
-        {reviews.length === 0 ? (
-          <div className="mt-3 rounded-lg border border-dashed border-line p-8 text-center text-sm text-ink-muted">Ainda não há avaliações. Sê o primeiro a avaliar este produto depois da compra.</div>
-        ) : (
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {reviews.map((r) => (
-              <div key={r.id} className="rounded-lg border border-line p-4">
-                <div className="flex items-center justify-between">
-                  <Stars value={r.rating} size="md" />
-                  {r.is_verified && <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Compra verificada</span>}
-                </div>
-                {r.title && <p className="mt-2 font-medium">{r.title}</p>}
-                <p className="mt-1 text-sm text-ink-soft">{r.body}</p>
-                <p className="mt-2 text-xs text-ink-muted">{r.author_name}</p>
-                {r.admin_response && <div className="mt-3 rounded-md bg-surface p-3 text-sm"><p className="text-xs font-semibold text-ink-muted">Resposta da loja</p><p className="mt-0.5">{r.admin_response}</p></div>}
+      <Reveal>
+        <section className="pd-sec">
+          <h2 className="pd-sec-t">Porquê este produto?</h2>
+          <div className="pd-bens">
+            {benefits.map((b, i) => (
+              <div key={i} className="pd-ben">
+                <div className="pd-ben-ic">{b.icon}</div>
+                <div><p className="pd-ben-t">{b.title}</p><p className="pd-ben-s">{b.sub}</p></div>
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      </Reveal>
+
+      {(p.description || specRows.length > 0) && (
+        <Reveal>
+          <section className="pd-sec grid gap-8 lg:grid-cols-5">
+            {p.description && (
+              <div className="lg:col-span-3">
+                <h2 className="pd-sec-t">Descrição</h2>
+                <div className="prose-sm mt-4 whitespace-pre-line text-ink-soft leading-relaxed">{p.description}</div>
+              </div>
+            )}
+            {specRows.length > 0 && (
+              <div className="lg:col-span-2">
+                <h2 className="pd-sec-t">Especificações</h2>
+                <dl className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white text-sm">
+                  {specRows.map(([k, v]) => (
+                    <div key={k} className="flex justify-between gap-4 px-4 py-3"><dt className="text-ink-muted">{k}</dt><dd className="font-medium text-right">{v}</dd></div>
+                  ))}
+                </dl>
+              </div>
+            )}
+          </section>
+        </Reveal>
+      )}
+
+      <Reveal>
+        <section id="avaliacoes" className="pd-sec">
+          <h2 className="pd-sec-t">Avaliações dos clientes <span className="text-ink-muted font-normal text-sm">({reviews.length})</span></h2>
+          {reviews.length === 0 ? (
+            <div className="mt-4 rounded-2xl border border-dashed border-line p-8 text-center text-sm text-ink-muted">Este produto ainda não tem avaliações — sê o primeiro depois da compra.</div>
+          ) : (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="rounded-2xl border border-line bg-white p-4">
+                  <div className="flex items-center justify-between">
+                    <Stars value={r.rating} size="md" />
+                    {r.is_verified && <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700"><BadgeCheck className="h-3.5 w-3.5" /> Verificada</span>}
+                  </div>
+                  {r.title && <p className="mt-2 font-medium">{r.title}</p>}
+                  <p className="mt-1 text-sm text-ink-soft">{r.body}</p>
+                  <p className="mt-2 text-xs text-ink-muted">{r.author_name}</p>
+                  {r.admin_response && <div className="mt-3 rounded-lg bg-surface p-3 text-sm"><p className="text-xs font-semibold text-ink-muted">Resposta da loja</p><p className="mt-0.5">{r.admin_response}</p></div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="pd-sec">
+          <h2 className="pd-sec-t">Perguntas frequentes</h2>
+          <div className="mt-4"><Faq items={faqItems} /></div>
+        </section>
+      </Reveal>
 
       {related.length > 0 && (
-        <section className="mt-14">
-          <h2 className="mb-5 text-lg font-semibold">Também podes gostar</h2>
-          <ProductGrid products={related} compact />
-        </section>
+        <Reveal>
+          <section className="pd-sec">
+            <h2 className="pd-sec-t">Produtos relacionados</h2>
+            <div className="mt-5"><ProductGrid products={related} compact /></div>
+          </section>
+        </Reveal>
       )}
     </div>
   )
