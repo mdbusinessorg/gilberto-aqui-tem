@@ -18,12 +18,19 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   monitores: Laptop, informatica: Laptop,
 }
 
-const MAIN_CATS = [
-  { name: 'Smartphones', img: '/categorias/smartphones.webp', href: '/loja?categoria=iphone', desc: 'iPhone, Samsung e mais' },
-  { name: 'Monitores & Visuais', img: '/categorias/monitores.webp', href: '/categoria/monitores', desc: 'Monitores, visores e projetores' },
-  { name: 'Informática', img: '/categorias/informatica.webp', href: '/categoria/informatica', desc: 'Portáteis, impressoras e rede' },
-  { name: 'Acessórios', img: '/categorias/acessorios.webp', href: '/categoria/acessorios', desc: 'Áudio, cabos e gadgets' },
-]
+const CAT_PRIORITY = ['iphone', 'samsung', 'tablets', 'laptops', 'monitores', 'informatica', 'audio', 'acessorios', 'playstation', 'airpods', 'apple-watch', 'android', 'macbook', 'outros']
+const CAT_IMG: Record<string, string> = {
+  iphone: 'https://hfwshixqfhrnxwtixoqr.supabase.co/storage/v1/object/public/products/hero/web-hero-iphone.png',
+  samsung: '/categorias/samsung.webp',
+  tablets: '/categorias/tablets.webp',
+  laptops: '/categorias/computadores.webp',
+  monitores: '/categorias/monitores.webp',
+  informatica: '/categorias/informatica.webp',
+  acessorios: '/categorias/acessorios.webp',
+}
+const CAT_HREF: Record<string, string> = {
+  laptops: '/loja?categorias=laptops,macbook',
+}
 export default async function HomePage() {
   const [recent, featured, promos, misc, popular, phones, audio, allProducts, categories, brands, banners] = await Promise.all([
     getProducts({ sort: 'recent', inStock: true, perPage: 3 }),
@@ -53,6 +60,21 @@ export default async function HomePage() {
   const best = (popular.products.some(p => (p.sold_count ?? 0) > 0) ? popular.products : featured.products).slice(0, 3)
   const topCategories = categories.filter(c => !c.parent_id)
   const catImage = (slug: string) => allProducts.products.find(p => p.category_slug === slug)?.image_url ?? null
+  const catCount = (slug: string) => allProducts.products.filter(p => p.category_slug === slug).length
+  const catTiles = topCategories
+    .map(c => ({
+      slug: c.slug,
+      name: c.slug === 'laptops' ? 'Computadores' : c.name,
+      href: CAT_HREF[c.slug] ?? `/loja?categoria=${c.slug}`,
+      img: CAT_IMG[c.slug] ?? catImage(c.slug),
+      icon: CATEGORY_ICONS[c.slug] ?? Grid2X2,
+      desc: `${catCount(c.slug)} ${catCount(c.slug) === 1 ? 'produto' : 'produtos'}`,
+    }))
+    .sort((a, b) => {
+      const ia = CAT_PRIORITY.indexOf(a.slug), ib = CAT_PRIORITY.indexOf(b.slug)
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib)
+    })
+    .slice(0, 8)
   const childrenOf = (id: string) => categories.filter(c => c.parent_id === id).map(c => c.name).slice(0, 3).join(', ')
   const promoA = audio.products[0]
   const promoB = misc.products[0]
@@ -121,9 +143,13 @@ export default async function HomePage() {
             <section className="sm-cats3" aria-label="Categorias principais">
               <div className="sm-heading"><h2>Categorias</h2><Link href="/loja">Ver todas <ChevronRight className="h-3.5 w-3.5" /></Link></div>
               <div className="sm-cats3-grid">
-                {MAIN_CATS.map(c => (
-                  <Link key={c.name} href={c.href} className="sm-cat3">
-                    <span className="sm-cat3-img"><Image src={c.img} alt="" fill sizes="(max-width: 640px) 64px, 96px" /></span>
+                {catTiles.map(c => (
+                  <Link key={c.slug} href={c.href} className="sm-cat3">
+                    <span className="sm-cat3-img">
+                      {c.img
+                        ? <Image src={c.img} alt="" fill sizes="(max-width: 640px) 64px, 96px" style={{ objectFit: 'contain' }} />
+                        : <span className="sm-cat3-ico"><c.icon className="h-8 w-8" /></span>}
+                    </span>
                     <span className="sm-cat3-txt"><strong>{c.name}</strong><small>{c.desc}</small></span>
                     <ChevronRight className="h-4 w-4 sm-cat3-arrow" />
                   </Link>

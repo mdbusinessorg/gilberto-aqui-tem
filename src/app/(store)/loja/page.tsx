@@ -14,7 +14,7 @@ export const revalidate = 60
 
 export default async function ShopPage({ searchParams }: { searchParams: Record<string, string | undefined> }) {
   const filters: ProductFilters = {
-    q: searchParams.q, category: searchParams.categoria, brand: searchParams.marca,
+    q: searchParams.q, category: searchParams.categoria, categories: searchParams.categorias?.split(',').filter(Boolean), brand: searchParams.marca,
     condition: searchParams.estado, min: searchParams.min ? Number(searchParams.min) : undefined,
     max: searchParams.max ? Number(searchParams.max) : undefined,
     sort: (searchParams.ordem as ProductFilters['sort']) || 'recent',
@@ -79,6 +79,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
 
           <form className="grid grid-cols-2 gap-3 lg:grid-cols-1 rounded-md border border-line p-4" action="/loja">
             {filters.q && <input type="hidden" name="q" value={filters.q} />}
+            {filters.category && <input type="hidden" name="categoria" value={filters.category} />}
+            {searchParams.categorias && <input type="hidden" name="categorias" value={searchParams.categorias} />}
 
             <div>
               <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">Marca</p>
