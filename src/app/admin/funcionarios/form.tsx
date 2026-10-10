@@ -28,13 +28,18 @@ export function EmployeeForm({ employee }: { employee?: Employee }) {
     if (!f.full_name.trim()) { toast.error('Nome obrigatório'); return }
     setLoading(true)
     const supabase = createClient()
-    const row = { full_name: f.full_name.trim(), department: f.department, position: f.position || null, phone: f.phone || null, email: f.email || null, hire_date: f.hire_date || null, schedule_start: f.schedule_start, schedule_end: f.schedule_end, status: f.status, notes: f.notes || null }
+    let profileId: string | null = employee?.profile_id ?? null
+    if (f.email.trim()) {
+      const { data: prof } = await supabase.rpc('find_profile_by_email', { p_email: f.email.trim() } as never)
+      if (prof) profileId = (prof as { id: string }).id
+    }
+    const row = { full_name: f.full_name.trim(), department: f.department, position: f.position || null, phone: f.phone || null, email: f.email || null, hire_date: f.hire_date || null, schedule_start: f.schedule_start, schedule_end: f.schedule_end, status: f.status, notes: f.notes || null, profile_id: profileId }
     const { error } = employee
       ? await supabase.from('employees').update(row as never).eq('id', employee.id)
       : await supabase.from('employees').insert(row as never)
     setLoading(false)
     if (error) toast.error('Erro', error.message)
-    else { toast.success(employee ? 'Funcionário actualizado' : 'Funcionário registado'); setOpen(false); router.refresh() }
+    else { toast.success(employee ? 'Funcionário actualizado' : f.email && profileId ? 'Funcionário registado e conta vinculada' : 'Funcionário registado'); setOpen(false); router.refresh() }
   }
 
   return (

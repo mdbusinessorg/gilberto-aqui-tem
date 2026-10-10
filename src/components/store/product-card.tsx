@@ -59,9 +59,10 @@ export function ProductCard({ p, compact, horizontal, actions, stats }: { p: Sto
       <div className="product-card-image relative aspect-square overflow-hidden">
         <ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-2" sizes={horizontal ? '(max-width: 640px) 30vw, 140px' : '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px'} />
         {actions && p.category_name && <span className="product-card-tag">{p.category_name}</span>}
-        <button onClick={fav} aria-label="Adicionar aos favoritos"
-          className={`absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-all hover:scale-110 ${liked ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}>
+        <button onClick={fav} aria-label={`Adicionar aos favoritos${(stats?.favs ?? 0) > 0 ? ` (${stats!.favs} gostos)` : ''}`}
+          className={`absolute right-2.5 top-2.5 z-10 flex h-8 items-center justify-center gap-1 rounded-full bg-white/90 px-2 shadow-sm transition-all hover:scale-110 ${liked ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}>
           <Heart className={`h-4 w-4 ${liked ? 'fill-red-500' : ''}`} />
+          {((stats?.favs ?? 0) + (liked ? 1 : 0)) > 0 && <span className="text-[11px] font-semibold text-ink tabular">{(stats?.favs ?? 0) + (liked ? 1 : 0)}</span>}
         </button>
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1">
           {price.active && <Badge tone="red">-{price.discount}%</Badge>}
@@ -89,8 +90,11 @@ export function ProductCard({ p, compact, horizontal, actions, stats }: { p: Sto
             <span className="text-xs text-ink-muted">({p.rating_count})</span>
           </div>
         )}
-        {(stats?.views ?? 0) > 0 && (
-          <p className="mt-1 flex items-center gap-1 text-[11px] text-ink-muted"><Eye className="h-3 w-3" /> {stats!.views} {stats!.views === 1 ? 'visualização' : 'visualizações'}</p>
+        {((stats?.views ?? 0) > 0 || (stats?.favs ?? 0) > 0) && (
+          <p className="mt-1 flex items-center gap-2 text-[11px] text-ink-muted">
+            {(stats?.views ?? 0) > 0 && <span className="inline-flex items-center gap-1"><Eye className="h-3 w-3" /> {stats!.views} {stats!.views === 1 ? 'visualização' : 'visualizações'}</span>}
+            {(stats?.favs ?? 0) > 0 && <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3 fill-red-400 text-red-400" /> {stats!.favs} {stats!.favs === 1 ? 'gosto' : 'gostos'}</span>}
+          </p>
         )}
         <div className="product-card-price mt-auto pt-3 flex flex-wrap items-end justify-between gap-2">
           <div>

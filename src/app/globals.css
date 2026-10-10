@@ -411,6 +411,40 @@ a.dash-chip:hover { border-color: #1546b8; color: #1546b8; }
 .clock-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #f3f4f6; }
 .clock-view { aspect-ratio: 4 / 3; overflow: hidden; border-radius: 12px; background: #111; margin-bottom: 14px; }
 .clock-view video, .clock-view img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+/* Verificação facial (biométrico) */
+.face-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: rgba(8,12,24,.78); padding: 16px; }
+.face-box { position: relative; width: 100%; max-width: 380px; background: #fff; border-radius: 20px; padding: 22px 20px 20px; text-align: center; }
+.face-title { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 700; color: #111; }
+.face-sub { font-size: 12.5px; color: #6b7280; margin: 6px 0 14px; }
+.face-oval { position: relative; width: 230px; height: 290px; margin: 0 auto; overflow: hidden; border-radius: 50% / 42%; background: #0b1220; border: 3px solid #1546b8; box-shadow: 0 0 0 5px rgba(21,70,184,.12), 0 18px 40px rgba(2,8,30,.28); }
+.face-oval video, .face-oval img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.face-oval.scanning { border-color: #22c55e; box-shadow: 0 0 0 5px rgba(34,197,94,.15), 0 18px 40px rgba(2,8,30,.28); }
+.face-oval.ok { border-color: #22c55e; }
+.face-oval.err { border-color: #ef4444; }
+.face-scanline { position: absolute; left: 6%; right: 6%; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, #4ade80 20%, #4ade80 80%, transparent); box-shadow: 0 0 14px 3px rgba(74,222,128,.7); animation: face-scan 2.1s ease-in-out infinite; }
+@keyframes face-scan { 0%, 100% { top: 8%; } 50% { top: 88%; } }
+.face-corners { position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(#4ade80,#4ade80) top 10px left 14px / 26px 3px,
+    linear-gradient(#4ade80,#4ade80) top 10px left 14px / 3px 26px,
+    linear-gradient(#4ade80,#4ade80) top 10px right 14px / 26px 3px,
+    linear-gradient(#4ade80,#4ade80) top 10px right 14px / 3px 26px,
+    linear-gradient(#4ade80,#4ade80) bottom 10px left 14px / 26px 3px,
+    linear-gradient(#4ade80,#4ade80) bottom 10px left 14px / 3px 26px,
+    linear-gradient(#4ade80,#4ade80) bottom 10px right 14px / 26px 3px,
+    linear-gradient(#4ade80,#4ade80) bottom 10px right 14px / 3px 26px;
+  background-repeat: no-repeat; opacity: .9; }
+.face-success { display: grid; place-items: center; gap: 8px; width: 100%; height: 100%; background: #052e16; color: #4ade80; }
+.face-success svg { width: 64px; height: 64px; }
+.face-success span { font-size: 13px; font-weight: 700; color: #bbf7d0; }
+.face-capture-btn { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #1546b8; color: #fff; border: 4px solid #dbe5fb; box-shadow: 0 10px 24px rgba(21,70,184,.35); transition: transform .15s; }
+.face-capture-btn:hover { transform: scale(1.06); } .face-capture-btn:active { transform: scale(.94); }
+.face-btn { display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 600; }
+.face-btn.primary { background: #1546b8; color: #fff; box-shadow: 0 8px 20px rgba(21,70,184,.3); }
+.face-btn.ghost { border: 1px solid #e2e6ef; color: #374151; background: #fff; }
+.face-verifying { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #1546b8; }
+.face-verifying::before { content: ''; width: 16px; height: 16px; border: 2.5px solid #c7d4f5; border-top-color: #1546b8; border-radius: 50%; animation: face-spin 0.8s linear infinite; }
+@keyframes face-spin { to { transform: rotate(360deg); } }
 /* Assistente do administrador */
 .va { display: flex; flex-direction: column; height: min(72vh, 680px); }
 .va-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 10px; background: #f8fafc; }

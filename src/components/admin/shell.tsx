@@ -7,6 +7,7 @@ import {
   ClipboardCheck, ListTodo, Truck, ShoppingBag, Tag, BarChart3, Bell, ScrollText, Settings, Store, Menu, X, LogOut, Search, ChevronDown, ArrowUpRight, Sparkles,
 } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
+import { ClockFab } from '@/components/admin/clock-fab'
 import { cn } from '@/lib/utils'
 import { ROLE_LABELS, isAdminRole, type UserRole } from '@/lib/labels'
 import { Badge } from '@/components/ui'
@@ -110,6 +111,7 @@ export function AdminShell({ children, user }: { children: React.ReactNode; user
         </header>
         <main className="min-w-0 flex-1 p-4 sm:p-6">{children}</main>
       </div>
+      <ClockFab />
     </div>
   )
 }

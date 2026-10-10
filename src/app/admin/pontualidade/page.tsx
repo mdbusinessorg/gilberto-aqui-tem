@@ -1,7 +1,7 @@
 import { createClient, getSessionProfile } from '@/lib/supabase/server'
 import { PageHeader, Card, Table, THead, TBody, StatusBadge, EmptyState } from '@/components/ui'
 import { formatTime, minutesToHours, todayISO } from '@/lib/utils'
-import { ATTENDANCE_STATUS } from '@/lib/labels'
+import { ATTENDANCE_STATUS, STAFF_ROLES } from '@/lib/labels'
 import { ClockCamera } from '@/components/admin/clock-camera'
 import { isManagerRole } from '@/lib/labels'
 
@@ -12,19 +12,18 @@ export default async function AttendancePage({ searchParams }: { searchParams: R
   const { user, profile } = await getSessionProfile()
   const manager = !!profile && isManagerRole(profile.role)
   const day = searchParams.dia ?? todayISO()
-  const [{ data: attendance }, { data: myEmployee }, { data: employees }] = await Promise.all([
+  const [{ data: attendance }, { data: employees }] = await Promise.all([
     supabase.from('attendance').select('*, employees(full_name, department, schedule_start)').eq('work_date', manager ? day : todayISO()).order('check_in'),
-    user ? supabase.from('employees').select('id,full_name').eq('profile_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from('employees').select('id,full_name').eq('status', 'activo').order('full_name'),
   ])
   const present = (attendance ?? []).filter((a) => a.check_in).length
   const late = (attendance ?? []).filter((a) => a.status === 'atrasado').length
-  const mine = myEmployee ? (attendance ?? []).find((a) => a.employee_id === myEmployee.id) : null
+  const canClock = !!profile && STAFF_ROLES.includes(profile.role)
 
   return (
     <>
       <PageHeader title="Pontualidade" description={day === todayISO() ? 'Hoje' : day}
-        actions={<div className="flex items-center gap-2"><form><input type="date" name="dia" defaultValue={day} className="h-10 rounded-md border border-line px-3 text-sm" /></form>{myEmployee && <ClockCamera employeeId={myEmployee.id} today={mine} compact />}</div>} />
+        actions={<div className="flex items-center gap-2"><form><input type="date" name="dia" defaultValue={day} className="h-10 rounded-md border border-line px-3 text-sm" /></form>{canClock && <ClockCamera compact />}</div>} />
       <div className="mb-6 grid grid-cols-3 gap-3">
         <Card className="p-4"><p className="text-xs text-ink-muted">Presentes</p><p className="mt-1 text-2xl font-semibold tabular">{present}<span className="text-sm font-normal text-ink-muted">/{employees?.length ?? 0}</span></p></Card>
         <Card className="p-4"><p className="text-xs text-ink-muted">Atrasados</p><p className="mt-1 text-2xl font-semibold tabular text-amber-600">{late}</p></Card>
