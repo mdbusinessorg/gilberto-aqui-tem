@@ -434,9 +434,12 @@ a.dash-chip:hover { border-color: #1546b8; color: #1546b8; }
     linear-gradient(#4ade80,#4ade80) bottom 10px right 14px / 26px 3px,
     linear-gradient(#4ade80,#4ade80) bottom 10px right 14px / 3px 26px;
   background-repeat: no-repeat; opacity: .9; }
-.face-success { display: grid; place-items: center; gap: 8px; width: 100%; height: 100%; background: #052e16; color: #4ade80; }
-.face-success svg { width: 64px; height: 64px; }
-.face-success span { font-size: 13px; font-weight: 700; color: #bbf7d0; }
+.face-success { position: relative; display: grid; place-items: center; gap: 10px; width: 100%; height: 100%; background: #052e16; overflow: hidden; }
+.face-success-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: .28; filter: saturate(.7) brightness(.8); }
+.face-success-badge { position: relative; display: grid; place-items: center; width: 76px; height: 76px; border-radius: 50%; background: #22c55e; color: #fff; box-shadow: 0 0 0 8px rgba(34,197,94,.22), 0 0 34px rgba(34,197,94,.55); animation: face-pop .55s cubic-bezier(.2,1.6,.4,1) both; }
+.face-success-badge svg { width: 44px; height: 44px; }
+.face-success-txt { position: relative; font-size: 14px; font-weight: 800; color: #dcfce7; text-shadow: 0 1px 6px rgba(0,0,0,.5); padding: 0 12px; }
+@keyframes face-pop { 0% { transform: scale(.3); opacity: 0; } 70% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); } }
 .face-capture-btn { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #1546b8; color: #fff; border: 4px solid #dbe5fb; box-shadow: 0 10px 24px rgba(21,70,184,.35); transition: transform .15s; }
 .face-capture-btn:hover { transform: scale(1.06); } .face-capture-btn:active { transform: scale(.94); }
 .face-btn { display: inline-flex; align-items: center; gap: 7px; height: 42px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 600; }
