@@ -1,10 +1,11 @@
 import Link from '@/components/ui/navigation-link'
-import { Receipt, ShoppingCart, Users, Package, AlertTriangle, RefreshCw, Star, Clock, ListTodo, Undo2, Truck, Warehouse, BarChart3 } from 'lucide-react'
+import { Receipt, ShoppingCart, Users, Package, AlertTriangle, RefreshCw, Star, Clock, ListTodo, Undo2, Truck, Warehouse, BarChart3, Eye, Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { StatusBadge } from '@/components/ui'
 import { formatKz, formatDateTime } from '@/lib/utils'
 import { ORDER_STATUS } from '@/lib/labels'
 import { HabitsChart, CategoryRings, ChannelBubbles } from './dashboard-charts'
+import { getMetrics } from '@/lib/metrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,6 +33,16 @@ export default async function AdminDashboard() {
     supabase.from('orders').select('total,status,created_at').gte('created_at', prevStart.toISOString()).lt('created_at', monthStart.toISOString()),
     supabase.from('categories').select('id,name'),
   ])
+  const metrics = await getMetrics()
+  const metricIds = Object.keys(metrics)
+  const { data: popRows } = metricIds.length
+    ? await supabase.from('products').select('id,name,slug').in('id', metricIds)
+    : { data: [] as { id: string; name: string | null; slug: string | null }[] }
+  const popular = (popRows ?? [])
+    .map(x => ({ ...x, views: metrics[x.id]?.views ?? 0, favs: metrics[x.id]?.favs ?? 0 }))
+    .filter(x => x.views > 0 || x.favs > 0)
+    .sort((a, b) => (b.views + b.favs * 3) - (a.views + a.favs * 3))
+    .slice(0, 8)
   const catId = new Map((catRows ?? []).map(c => [c.name, c.id]))
   const monthRange = (y: number, m: number) => `de=${iso(new Date(y, m, 1))}&ate=${iso(new Date(y, m + 1, 0))}`
   const s = (stats ?? {}) as Record<string, number>
@@ -126,6 +137,28 @@ export default async function AdminDashboard() {
             <div><p>{x.label}</p><strong className="tabular">{x.value}</strong></div>
           </Link>
         ))}
+      </div>
+
+      <div className="dash-card mt-4">
+        <div className="flex items-center justify-between">
+          <div><h2 className="font-semibold">Produtos que bombam</h2><p className="text-xs text-ink-muted">Visualizações e favoritos na loja — para decidir promoções e stock</p></div>
+          <Link href="/admin/produtos" className="text-sm font-medium text-brand-700">Ver produtos</Link>
+        </div>
+        {!popular.length ? <p className="py-6 text-center text-sm text-ink-muted">Ainda sem dados — as visualizações contam a partir de agora</p> : (
+          <ul className="mt-2 divide-y divide-line">
+            {popular.map(x => (
+              <li key={x.id}>
+                <Link href="/admin/produtos" className="flex items-center justify-between py-3 text-sm hover:bg-surface/50">
+                  <p className="min-w-0 truncate font-medium">{x.name}</p>
+                  <div className="flex flex-none items-center gap-4 text-xs text-ink-muted">
+                    <span className="flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" />{x.views} vistas</span>
+                    <span className="flex items-center gap-1.5"><Heart className="h-3.5 w-3.5" />{x.favs} favoritos</span>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="dash-card mt-4">

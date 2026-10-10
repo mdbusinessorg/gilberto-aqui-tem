@@ -11,6 +11,7 @@ import { WHATSAPP_DISPLAY } from '@/lib/whatsapp'
 import { ProductBuyBox } from './buy-box'
 import { ProductGallery } from './gallery'
 import { Faq } from './faq'
+import { ViewPing } from '@/components/store/view-ping'
 
 export const revalidate = 60
 
@@ -68,6 +69,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     <div className="shell pd-page">
       <div className="pd-hero-card">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-10">
+          <ViewPing id={p.id!} />
           <ProductGallery images={images} fallback={p.image_url} name={p.name ?? ''} brand={p.brand_name ?? null} tag={tag} productId={p.id!} slug={p.slug!} />
           <div className="pd-body">
             <h1 className="pd-name">{p.name}</h1>

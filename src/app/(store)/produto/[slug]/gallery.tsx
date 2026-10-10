@@ -24,7 +24,7 @@ export function ProductGallery({ images, fallback, name, brand, tag, productId, 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { window.location.assign('/entrar?next=' + encodeURIComponent(`/produto/${slug}`)); return }
     const { error } = await supabase.from('wishlists').upsert({ profile_id: user.id, product_id: productId } as never)
-    if (error) toast.error('Não foi possível guardar'); else { setSaved(true); toast.success('Guardado nos favoritos') }
+    if (error) toast.error('Não foi possível guardar'); else { setSaved(true); toast.success('Guardado nos favoritos'); void fetch('/api/metrics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product_id: productId, type: 'favs' }) }).catch(() => {}) }
   }
 
   React.useEffect(() => {

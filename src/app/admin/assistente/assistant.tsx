@@ -19,6 +19,7 @@ export function VoiceAssistant({ adminName }: { adminName: string }) {
   const [call, setCall] = React.useState(false)
   const [speak, setSpeak] = React.useState(true)
   const [busy, setBusy] = React.useState(false)
+  const [speaking, setSpeaking] = React.useState(false)
   const recRef = React.useRef<Rec | null>(null)
   const callRef = React.useRef(false)
   const speakingRef = React.useRef(false)
@@ -41,12 +42,12 @@ export function VoiceAssistant({ adminName }: { adminName: string }) {
 
   const say = (text: string, onend?: () => void) => {
     if (!speak || typeof speechSynthesis === 'undefined') { onend?.(); return }
-    speechSynthesis.cancel()
+    speechSynthesis.cancel(); speechSynthesis.resume()
     const u = new SpeechSynthesisUtterance(text)
     u.lang = 'pt-PT'; u.rate = 1.04; u.pitch = 1
     const v = pickVoice(); if (v) u.voice = v
-    speakingRef.current = true
-    u.onend = u.onerror = () => { speakingRef.current = false; onend?.() }
+    speakingRef.current = true; setSpeaking(true)
+    u.onend = u.onerror = () => { speakingRef.current = false; setSpeaking(false); onend?.() }
     speechSynthesis.speak(u)
   }
 
@@ -94,6 +95,7 @@ export function VoiceAssistant({ adminName }: { adminName: string }) {
 
   const toggleCall = () => {
     if (call) {
+      if (speakingRef.current) { speechSynthesis?.cancel(); return }
       callRef.current = false; setCall(false); stopRec(); speechSynthesis?.cancel()
       return
     }
@@ -116,12 +118,12 @@ export function VoiceAssistant({ adminName }: { adminName: string }) {
     <div className="va">
       <div className="va-log">
         {messages.map((m, i) => <div key={i} className={`va-msg ${m.role}`}>{m.role === 'assistant' && <Sparkles className="h-3.5 w-3.5" />}<p>{m.content}</p></div>)}
-        {busy && <div className="va-msg assistant"><Sparkles className="h-3.5 w-3.5" /><p className="va-typing">A pensar…</p></div>}
+        {busy && <div className="va-msg assistant"><Sparkles className="h-3.5 w-3.5" /><p className="va-typing">{speaking ? 'A falar — toca no telefone para interromper' : 'A pensar…'}</p></div>}
         <div ref={endRef} />
       </div>
       <div className="va-suggest">{SUGGESTIONS.map(s => <button key={s} type="button" onClick={() => ask(s)} disabled={busy}>{s}</button>)}</div>
       <form className="va-bar" onSubmit={e => { e.preventDefault(); void ask(input) }}>
-        <button type="button" className={`va-mic ${call ? 'on' : ''}`} onClick={toggleCall} disabled={!supported} title={supported ? (call ? 'Terminar chamada' : 'Chamada por voz') : 'Reconhecimento de voz indisponível neste navegador'} aria-label="Chamada por voz">
+        <button type="button" className={`va-mic ${call ? 'on' : ''}`} onClick={toggleCall} disabled={!supported} title={supported ? (call ? 'Toca para me interromper; toca de novo para terminar' : 'Chamada por voz') : 'Reconhecimento de voz indisponível neste navegador'} aria-label="Chamada por voz">
           {call ? <PhoneOff className="h-5 w-5" /> : <Phone className="h-5 w-5" />}
         </button>
         <input value={input} onChange={e => setInput(e.target.value)} placeholder={call ? 'Em chamada — fala naturalmente' : 'Escreve ou fala com o assistente'} />
