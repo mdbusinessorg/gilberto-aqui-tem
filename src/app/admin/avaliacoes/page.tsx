@@ -3,6 +3,8 @@ import { PageHeader, Card, Stars, Badge, EmptyState } from '@/components/ui'
 import { formatDate } from '@/lib/utils'
 import { REVIEW_STATUS } from '@/lib/labels'
 import { ReviewActions } from './actions'
+import { StoreReviewActions } from './store-actions'
+import { getStoreReviews } from '@/lib/metrics'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,6 +14,7 @@ export default async function ReviewsAdminPage({ searchParams }: { searchParams:
   if (searchParams.estado) q = q.eq('status', searchParams.estado as never)
   else q = q.order('status')
   const { data: reviews } = await q
+  const storeRevs = (await getStoreReviews()).filter(r => !searchParams.estado || r.status === searchParams.estado)
   const tabs = [['', 'Todas'], ['pendente', 'Pendentes'], ['aprovada', 'Aprovadas'], ['rejeitada', 'Rejeitadas'], ['oculta', 'Ocultas']]
   return (
     <>
@@ -36,6 +39,28 @@ export default async function ReviewsAdminPage({ searchParams }: { searchParams:
               <ReviewActions review={r} />
             </Card>
           ))}
+        </div>
+      )}
+
+      {storeRevs.length > 0 && (
+        <div className="mt-6">
+          <h2 className="mb-3 text-sm font-semibold">Avaliações do site (após compra)</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {storeRevs.map((r) => (
+              <Card key={r.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2"><Stars value={r.rating} size="md" /><span className="text-xs font-medium text-ink-muted">{r.status}</span></div>
+                    <p className="mt-1.5 text-sm font-medium">{r.product_name}</p>
+                    <p className="mt-1 text-sm text-ink-soft">{r.comment}</p>
+                    {r.photo && <img src={r.photo} alt="Foto do cliente" className="mt-2 h-20 w-20 rounded-xl border border-line object-cover" />}
+                    <p className="mt-1.5 text-xs text-ink-muted">{r.author_name}{r.order_number ? ` · ${r.order_number}` : ''} · {formatDate(r.created_at)}</p>
+                  </div>
+                </div>
+                <StoreReviewActions id={r.id} status={r.status} />
+              </Card>
+            ))}
+          </div>
         </div>
       )}
     </>

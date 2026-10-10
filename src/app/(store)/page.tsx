@@ -6,6 +6,7 @@ import { Reveal } from '@/components/store/reveal'
 import { HeroSlider } from '@/components/store/hero-slider'
 import { Stars } from '@/components/ui'
 import { getProducts, getCategories, getBrands, getBanners } from '@/lib/store/queries'
+import { getMetrics } from '@/lib/metrics'
 import { CAT_PRIORITY, CAT_IMG, CAT_HREF, CAT_NAME } from '@/lib/store/cat-visual'
 import { priceOf } from '@/lib/store/price'
 import { formatKz } from '@/lib/utils'
@@ -69,6 +70,7 @@ export default async function HomePage() {
   const promoC = audio.products[1]
   const promoD = misc.products[1]
 
+  const viewsMap = await getMetrics()
   return (
     <div className="sm-home">
       <div className="shell sm-layout">
@@ -156,35 +158,35 @@ export default async function HomePage() {
           {destaques.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Destaques</h2><Link href="/loja?destaques=1">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{destaques.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{destaques.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
           {smartList.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Smartphones</h2><Link href="/loja?categoria=iphone">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{smartList.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{smartList.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
           {monitores.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Monitores & Visuais</h2><Link href="/categoria/monitores">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{monitores.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{monitores.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
           {informatica.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Informática</h2><Link href="/categoria/informatica">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{informatica.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{informatica.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
           {somEGaming.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Áudio & PlayStation</h2><Link href="/categoria/audio">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{somEGaming.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{somEGaming.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
@@ -199,14 +201,14 @@ export default async function HomePage() {
           {acessorios.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Acessórios</h2><Link href="/categoria/acessorios">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{acessorios.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{acessorios.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 
           {promocoes.length > 0 && (
             <Reveal><section className="sm-section">
               <div className="sm-heading"><h2>Em promoção</h2><Link href="/loja?promo=1">Ver todos <ChevronRight className="h-3.5 w-3.5" /></Link></div>
-              <div className="sm-grid4">{promocoes.map(p => <ProductCard key={p.id} p={p} compact />)}</div>
+              <div className="sm-grid4">{promocoes.map(p => <ProductCard key={p.id} p={p} compact stats={viewsMap[p.id!]} />)}</div>
             </section></Reveal>
           )}
 

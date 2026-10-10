@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { ShieldCheck, BadgeCheck, Palette, BatteryFull, HardDrive, Package } from 'lucide-react'
+import { ShieldCheck, BadgeCheck, Palette, BatteryFull, HardDrive, Package, Eye, Heart } from 'lucide-react'
 import { getProductBySlug } from '@/lib/store/queries'
 import { ProductGrid } from '@/components/store/product-card'
 import { Stars } from '@/components/ui'
@@ -12,6 +12,7 @@ import { ProductBuyBox } from './buy-box'
 import { ProductGallery } from './gallery'
 import { Faq } from './faq'
 import { ViewPing } from '@/components/store/view-ping'
+import { getMetrics, getStoreReviews } from '@/lib/metrics'
 
 export const revalidate = 60
 
@@ -24,6 +25,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const res = await getProductBySlug(params.slug)
   if (!res) notFound()
   const { product: p, images, reviews, related } = res
+  const viewsMap = await getMetrics()
+  const pm = viewsMap[p.id!] ?? { views: 0, favs: 0 }
+  const extraReviews = (await getStoreReviews())
+    .filter(r => r.product_id === p.id && (r.status === 'aprovada'))
+    .map(r => ({ id: r.id, author_name: r.author_name, rating: r.rating, title: null, body: r.comment, image_url: r.photo ?? null, is_verified: true, is_featured: false, admin_response: null, created_at: r.created_at })) as typeof reviews
+  const allReviews = [...reviews, ...extraReviews]
   const price = priceOf(p)
   const specs = (p.specs ?? {}) as Record<string, string>
   const out = (p.stock_total ?? 0) <= 0
@@ -80,6 +87,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   <span>{Number(p.rating_avg).toFixed(1)} · {p.rating_count} avaliações</span>
                 </a>
               ) : <span className="pd-rating"><Stars value={0} size="md" /><span>Sem avaliações ainda</span></span>}
+              {(pm.views > 0 || pm.favs > 0) && (
+                <span className="mt-1 flex items-center gap-3 text-xs text-ink-muted">
+                  {pm.views > 0 && <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {pm.views} já viram</span>}
+                  {pm.favs > 0 && <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {pm.favs} favoritos</span>}
+                </span>
+              )}
             </div>
             {shortDesc && <p className="pd-lead">{shortDesc}</p>}
             <ProductBuyBox p={p} features={features} />
@@ -126,12 +139,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
       <Reveal>
         <section id="avaliacoes" className="pd-sec">
-          <h2 className="pd-sec-t">Avaliações dos clientes <span className="text-ink-muted font-normal text-sm">({reviews.length})</span></h2>
-          {reviews.length === 0 ? (
+          <h2 className="pd-sec-t">Avaliações dos clientes <span className="text-ink-muted font-normal text-sm">({allReviews.length})</span></h2>
+          {allReviews.length === 0 ? (
             <div className="mt-4 rounded-2xl border border-dashed border-line p-8 text-center text-sm text-ink-muted">Este produto ainda não tem avaliações — sê o primeiro depois da compra.</div>
           ) : (
             <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((r) => (
+              {allReviews.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-line bg-white p-4">
                   <div className="flex items-center justify-between">
                     <Stars value={r.rating} size="md" />
@@ -139,6 +152,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                   </div>
                   {r.title && <p className="mt-2 font-medium">{r.title}</p>}
                   <p className="mt-1 text-sm text-ink-soft">{r.body}</p>
+                  {r.image_url && <img src={r.image_url} alt="Foto do cliente" className="mt-2 h-20 w-20 rounded-xl border border-line object-cover" />}
                   <p className="mt-2 text-xs text-ink-muted">{r.author_name}</p>
                   {r.admin_response && <div className="mt-3 rounded-lg bg-surface p-3 text-sm"><p className="text-xs font-semibold text-ink-muted">Resposta da loja</p><p className="mt-0.5">{r.admin_response}</p></div>}
                 </div>
@@ -159,7 +173,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         <Reveal>
           <section className="pd-sec">
             <h2 className="pd-sec-t">Produtos relacionados</h2>
-            <div className="mt-5"><ProductGrid products={related} compact /></div>
+            <div className="mt-5"><ProductGrid products={related} compact stats={viewsMap} /></div>
           </section>
         </Reveal>
       )}

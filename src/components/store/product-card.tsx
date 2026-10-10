@@ -1,10 +1,12 @@
 'use client'
 import Link from '@/components/ui/navigation-link'
 import Image from 'next/image'
-import { Smartphone, ShoppingBag, Check } from 'lucide-react'
+import { Smartphone, ShoppingBag, Check, Heart, Eye } from 'lucide-react'
 import { Badge, Stars } from '@/components/ui'
+import { useState } from 'react'
 import { useToast } from '@/components/ui/toast'
 import { useCart } from './cart-context'
+import { createClient } from '@/lib/supabase/client'
 import { formatKz, cn } from '@/lib/utils'
 import { CONDITION } from '@/lib/labels'
 import { priceOf } from '@/lib/store/price'
@@ -21,7 +23,7 @@ export function ProductImage({ src, alt, className, sizes = '(max-width: 640px) 
   return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={cn('object-contain', className)} />
 }
 
-export function ProductCard({ p, compact, horizontal, actions }: { p: StorefrontProduct; compact?: boolean; horizontal?: boolean; actions?: boolean }) {
+export function ProductCard({ p, compact, horizontal, actions, stats }: { p: StorefrontProduct; compact?: boolean; horizontal?: boolean; actions?: boolean; stats?: { views: number; favs: number } }) {
   const { add } = useCart()
   const toast = useToast()
   const price = priceOf(p)
@@ -40,12 +42,27 @@ export function ProductCard({ p, compact, horizontal, actions }: { p: Storefront
     add({ id: p.id!, slug: p.slug!, name: p.name!, price: price.final, image: p.image_url, stock: p.stock_total ?? 0, sku: p.sku!, detail })
     window.location.assign('/checkout')
   }
+  const [liked, setLiked] = useState(false)
+  const fav = async (e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation()
+    if (liked) return
+    setLiked(true)
+    void fetch('/api/metrics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product_id: p.id, type: 'favs' }) }).catch(() => {})
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) await supabase.from('wishlists').upsert({ profile_id: user.id, product_id: p.id! } as never)
+    toast.success('Adicionado aos favoritos', p.name ?? undefined)
+  }
 
   return (
     <Link href={`/produto/${p.slug}`} className={cn('product-card group flex flex-col border border-line bg-white transition-colors hover:border-brand-200', horizontal && 'product-card-horizontal')}>
       <div className="product-card-image relative aspect-square overflow-hidden">
         <ProductImage src={p.image_url} alt={p.name ?? ''} className="h-full w-full p-2" sizes={horizontal ? '(max-width: 640px) 30vw, 140px' : '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 280px'} />
         {actions && p.category_name && <span className="product-card-tag">{p.category_name}</span>}
+        <button onClick={fav} aria-label="Adicionar aos favoritos"
+          className={`absolute right-2.5 top-2.5 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-all hover:scale-110 ${liked ? 'text-red-500' : 'text-slate-400 hover:text-red-500'}`}>
+          <Heart className={`h-4 w-4 ${liked ? 'fill-red-500' : ''}`} />
+        </button>
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1">
           {price.active && <Badge tone="red">-{price.discount}%</Badge>}
           {p.condition && p.condition !== 'novo' && <Badge tone="slate">{CONDITION[p.condition].label}</Badge>}
@@ -72,6 +89,9 @@ export function ProductCard({ p, compact, horizontal, actions }: { p: Storefront
             <span className="text-xs text-ink-muted">({p.rating_count})</span>
           </div>
         )}
+        {(stats?.views ?? 0) > 0 && (
+          <p className="mt-1 flex items-center gap-1 text-[11px] text-ink-muted"><Eye className="h-3 w-3" /> {stats!.views} {stats!.views === 1 ? 'visualização' : 'visualizações'}</p>
+        )}
         <div className="product-card-price mt-auto pt-3 flex flex-wrap items-end justify-between gap-2">
           <div>
             <p className="text-[15px] font-semibold text-ink tabular">{formatKz(price.final)}</p>
@@ -91,10 +111,10 @@ export function ProductCard({ p, compact, horizontal, actions }: { p: Storefront
   )
 }
 
-export function ProductGrid({ products, compact }: { products: StorefrontProduct[]; compact?: boolean }) {
+export function ProductGrid({ products, compact, stats }: { products: StorefrontProduct[]; compact?: boolean; stats?: Record<string, { views: number; favs: number }> }) {
   return (
     <div className={cn('grid gap-3 sm:gap-4', compact ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4')}>
-      {products.map((p) => <ProductCard key={p.id} p={p} compact={compact} />)}
+      {products.map((p) => <ProductCard key={p.id} p={p} compact={compact} stats={stats?.[p.id!]} />)}
     </div>
   )
 }

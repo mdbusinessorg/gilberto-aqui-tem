@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from '@/components/ui/navigation-link'
 import { notFound } from 'next/navigation'
+import { getMetrics } from '@/lib/metrics'
 import { getProducts, getCategories } from '@/lib/store/queries'
 import { ProductGrid } from '@/components/store/product-card'
 import { EmptyState } from '@/components/ui'
@@ -18,6 +19,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
   const cat = cats.find((c) => c.slug === params.slug)
   if (!cat) notFound()
   const { products, total } = await getProducts({ category: cat.slug, perPage: 48 })
+  const viewsMap = await getMetrics()
   return (
     <div className="shell py-8">
       <nav className="text-xs text-ink-muted"><Link href="/" className="hover:text-ink">Início</Link> / <Link href="/loja" className="hover:text-ink">Loja</Link> / <span className="text-ink">{cat.name}</span></nav>
@@ -28,7 +30,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       </div>
       {products.length === 0
         ? <EmptyState title="Sem produtos nesta categoria" description="Explora a loja completa ou fala connosco no WhatsApp." action={<Link href="/loja" className="text-sm font-medium text-brand-700">Ver toda a loja</Link>} className="rounded-lg border border-dashed border-line" />
-        : <ProductGrid products={products} />}
+        : <ProductGrid products={products} stats={viewsMap} />}
     </div>
   )
 }

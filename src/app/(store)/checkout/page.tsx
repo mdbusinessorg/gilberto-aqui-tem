@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ShoppingBag, ShieldCheck, CheckCircle2 } from 'lucide-react'
+import { ReviewPrompt } from '@/components/store/review-prompt'
 import { useCart } from '@/components/store/cart-context'
 import { Button, Field, Input, Select, Textarea, EmptyState, ButtonLink } from '@/components/ui'
 import { useToast } from '@/components/ui/toast'
@@ -14,7 +15,7 @@ export default function CheckoutPage() {
   const toast = useToast()
   const router = useRouter()
   const [loading, setLoading] = React.useState(false)
-  const [done, setDone] = React.useState<{ number: string; total: number } | null>(null)
+  const [done, setDone] = React.useState<{ number: string; total: number; items: { id: string; name: string }[] } | null>(null)
   const [form, setForm] = React.useState({ name: '', phone: '', email: '', delivery: 'levantamento', address: '', payment: 'Transferência bancária', coupon: '', notes: '' })
   const [fee] = React.useState(0)
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
@@ -47,7 +48,7 @@ export default function CheckoutPage() {
     setLoading(false)
     if (error) { toast.error('Não foi possível criar o pedido', error.message); return }
     const res = data as { order_number: string; total: number }
-    setDone({ number: res.order_number, total: res.total })
+    setDone({ number: res.order_number, total: res.total, items: items.map(i => ({ id: i.id, name: i.name })) })
     if (form.email) {
       void fetch('/api/email/encomenda', {
         method: 'POST',
@@ -74,6 +75,7 @@ export default function CheckoutPage() {
           <ButtonLink href={`/pedido?n=${done.number}&t=${encodeURIComponent(form.phone)}`} variant="outline">Acompanhar pedido</ButtonLink>
           <ButtonLink href="/loja" variant="outline">Continuar a comprar</ButtonLink>
         </div>
+        <ReviewPrompt items={done.items} number={done.number} phone={form.phone} />
       </div>
     )
   if (items.length === 0)

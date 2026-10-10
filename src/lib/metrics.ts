@@ -25,3 +25,44 @@ export async function bumpMetric(productId: string, type: 'views' | 'favs'): Pro
     /* storage indisponível (ex.: dev local sem contexto Netlify) — não falhar o pedido */
   }
 }
+
+export type StoreReview = {
+  id: string
+  product_id: string
+  product_name: string
+  author_name: string
+  rating: number
+  comment: string
+  photo?: string | null
+  status: 'pendente' | 'aprovada' | 'rejeitada' | 'oculta'
+  order_number?: string
+  created_at: string
+}
+
+const REVIEWS_KEY = 'reviews'
+
+export async function getStoreReviews(): Promise<StoreReview[]> {
+  try {
+    const store = getStore({ name: STORE })
+    return ((await store.get(REVIEWS_KEY, { type: 'json' })) as StoreReview[] | null) ?? []
+  } catch {
+    return []
+  }
+}
+
+export async function addStoreReview(r: StoreReview): Promise<void> {
+  const store = getStore({ name: STORE })
+  const list = ((await store.get(REVIEWS_KEY, { type: 'json' })) as StoreReview[] | null) ?? []
+  list.unshift(r)
+  await store.setJSON(REVIEWS_KEY, list)
+}
+
+export async function setStoreReviewStatus(id: string, status: StoreReview['status']): Promise<boolean> {
+  const store = getStore({ name: STORE })
+  const list = ((await store.get(REVIEWS_KEY, { type: 'json' })) as StoreReview[] | null) ?? []
+  const i = list.findIndex((r) => r.id === id)
+  if (i < 0) return false
+  list[i] = { ...list[i], status }
+  await store.setJSON(REVIEWS_KEY, list)
+  return true
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from '@/components/ui/navigation-link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { getMetrics } from '@/lib/metrics'
 import { getProducts, getCategories, getBrands, type ProductFilters, type StorefrontProduct } from '@/lib/store/queries'
 import { priceOf } from '@/lib/store/price'
 import { formatKz } from '@/lib/utils'
@@ -42,6 +43,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
     return `/loja?${p.toString()}`
   }
 
+  const viewsMap = await getMetrics()
   return (
     <div className="shell py-8">
       <div className="mb-6">
@@ -158,7 +160,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
           {products.length === 0 ? (
             <EmptyState title="Sem produtos" description="Não encontrámos produtos com estes filtros. Tenta ajustar a pesquisa ou fala connosco no WhatsApp." className="rounded-lg border border-dashed border-line" />
           ) : (
-            <ProductGrid products={products} />
+            <ProductGrid products={products} stats={viewsMap} />
           )}
 
           {pages > 1 && (
