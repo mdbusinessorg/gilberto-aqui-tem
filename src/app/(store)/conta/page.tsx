@@ -13,7 +13,6 @@ import { RedeemCard } from './redeem'
 import { ClockCamera } from '@/components/admin/clock-camera'
 import { ClockFab } from '@/components/admin/clock-fab'
 import { STAFF_ROLES } from '@/lib/labels'
-import { todayISO } from '@/lib/utils'
 
 export const metadata = { title: 'A minha conta' }
 export const dynamic = 'force-dynamic'
@@ -34,8 +33,6 @@ export default async function AccountPage() {
   ])
 
   const isStaff = STAFF_ROLES.includes(profile.role)
-  const { data: employee } = isStaff ? await supabase.from('employees').select('id,full_name,department,schedule_start,schedule_end').eq('profile_id', user.id).maybeSingle() : { data: null }
-  const { data: todayAtt } = employee ? await supabase.from('attendance').select('*').eq('employee_id', employee.id).eq('work_date', todayISO()).maybeSingle() : { data: null }
   const tier = (customer?.tier ?? 'bronze') as keyof typeof TIER
   const points = customer?.loyalty_points ?? 0
 
@@ -49,13 +46,13 @@ export default async function AccountPage() {
         <SignOutButton />
       </div>
 
-      {employee && (
+      {isStaff && (
         <Card className="mb-6 border-brand-200 bg-brand-50/40 p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div><h2 className="text-base font-semibold">Registo de ponto</h2><p className="text-xs text-ink-muted">{employee.department} · horário {String(employee.schedule_start).slice(0, 5)}–{String(employee.schedule_end).slice(0, 5)} · só tu e a gestão vêem este registo</p></div>
+            <div><h2 className="text-base font-semibold">Registo de ponto</h2><p className="text-xs text-ink-muted">Verificação facial · só tu e a gestão vêem este registo</p></div>
             <Link href="/admin/pontualidade" className="text-sm font-medium text-brand-700">Ver o meu histórico</Link>
           </div>
-          <ClockCamera employeeId={employee.id} today={todayAtt} />
+          <ClockCamera />
         </Card>
       )}
 
@@ -107,7 +104,7 @@ export default async function AccountPage() {
           </CardBody>
         </Card>
       </div>
-      {employee && <ClockFab />}
+      {isStaff && <ClockFab />}
     </div>
   )
 }

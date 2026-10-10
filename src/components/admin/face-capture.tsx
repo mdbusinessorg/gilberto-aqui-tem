@@ -7,10 +7,11 @@ import { todayISO } from '@/lib/utils'
 
 type Phase = 'camera' | 'review' | 'verifying' | 'success' | 'error'
 
-export function FaceCapture({ open, action, employeeId, onClose, onDone }: {
+export function FaceCapture({ open, action, employeeId, employeeName, onClose, onDone }: {
   open: boolean
   action: 'clock_in' | 'clock_out' | null
   employeeId: string
+  employeeName?: string
   onClose: () => void
   onDone: () => void
 }) {
@@ -68,8 +69,15 @@ export function FaceCapture({ open, action, employeeId, onClose, onDone }: {
         ? await supabase.rpc('clock_in', { p_device: navigator.userAgent, p_photo: url })
         : await supabase.rpc('clock_out', { p_photo: url })
       if (error) throw new Error(error.message)
+      const hora = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Luanda' })
+      void supabase.rpc('notify_staff', {
+        p_title: `${action === 'clock_in' ? 'Ponto marcado' : 'Saída registada'}: ${employeeName || 'Funcionário'}`,
+        p_body: `${action === 'clock_in' ? 'Check-in' : 'Check-out'} às ${hora} · verificação facial`,
+        p_kind: 'pontualidade', p_priority: 'normal', p_link: '/admin/pontualidade',
+        p_roles: ['super_admin', 'admin', 'manager'],
+      })
       setPhase('success')
-      setTimeout(() => { onDone(); onClose() }, 1400)
+      setTimeout(() => { onDone(); onClose() }, 1600)
     } catch (e) {
       toast.error('Verificação falhou', (e as Error).message)
       setPhase('error')
@@ -82,11 +90,11 @@ export function FaceCapture({ open, action, employeeId, onClose, onDone }: {
       <div className="face-box">
         <button type="button" className="clock-close" onClick={onClose} aria-label="Fechar"><X className="h-4 w-4" /></button>
         <h3 className="face-title"><ScanFace className="h-5 w-5 text-brand-600" /> {title} — verificação facial</h3>
-        <p className="face-sub">{phase === 'camera' ? 'Centra o rosto no oval e toca em Verificar' : phase === 'verifying' ? 'A verificar a tua identidade…' : phase === 'success' ? 'Identidade confirmada' : 'Confirma a fotografia para registar o ponto'}</p>
+        <p className="face-sub">{phase === 'camera' ? 'Centra o rosto no oval e toca em Verificar' : phase === 'verifying' ? 'A verificar a tua identidade…' : phase === 'success' ? 'Ponto registado' : 'Confirma a fotografia para registar o ponto'}</p>
 
         <div className={`face-oval ${phase === 'verifying' ? 'scanning' : ''} ${phase === 'success' ? 'ok' : ''} ${phase === 'error' ? 'err' : ''}`}>
           {phase === 'success' ? (
-            <div className="face-success"><CheckCircle2 /><span>Verificação bem-sucedida</span></div>
+            <div className="face-success"><CheckCircle2 /><span>{action === 'clock_out' ? 'Check-out' : 'Ponto'} marcado com sucesso</span></div>
           ) : shot ? (
             <img src={shot} alt="Fotografia captada" />
           ) : (

@@ -1,62 +1,51 @@
 'use client'
 import * as React from 'react'
-import { useRouter } from 'next/navigation'
-import { LogIn, LogOut, ClipboardCheck } from 'lucide-react'
+import { Clock, LogIn, LogOut, ClipboardCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { formatTime, todayISO } from '@/lib/utils'
-import { FaceCapture } from '@/components/admin/face-capture'
+import { todayISO, formatTime } from '@/lib/utils'
+import { FaceCapture } from './face-capture'
+import { useRouter } from 'next/navigation'
 
-type Today = { check_in: string | null; check_out: string | null; check_in_photo?: string | null; late_minutes: number } | null
+type Emp = { id: string; full_name: string }
+type Today = { check_in: string | null; check_out: string | null } | null
 
 export function ClockFab() {
-  const [employeeId, setEmployeeId] = React.useState<string | null>(null)
+  const [employee, setEmployee] = React.useState<Emp | null>(null)
   const [today, setToday] = React.useState<Today>(null)
-  const [ready, setReady] = React.useState(false)
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState<false | 'clock_in' | 'clock_out'>(false)
   const router = useRouter()
 
   const load = React.useCallback(async () => {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setReady(true); return }
-    const { data: emp } = await supabase.from('employees').select('id').eq('profile_id', user.id).eq('status', 'activo').maybeSingle()
-    if (!emp) { setReady(true); return }
-    setEmployeeId(emp.id)
-    const { data: att } = await supabase.from('attendance').select('check_in,check_out,check_in_photo,late_minutes').eq('employee_id', emp.id).eq('work_date', todayISO()).maybeSingle()
-    setToday(att)
-    setReady(true)
+    if (!user) { setEmployee(null); return }
+    const { data: emp } = await supabase.from('employees').select('id, full_name').eq('profile_id', user.id).eq('status', 'activo').limit(1).maybeSingle()
+    setEmployee(emp || null)
+    if (!emp) return
+    const { data: t } = await supabase.from('attendance').select('check_in, check_out').eq('employee_id', emp.id).eq('work_date', todayISO()).limit(1).maybeSingle()
+    setToday(t || null)
   }, [])
 
-  React.useEffect(() => { void load() }, [load])
+  React.useEffect(() => { load() }, [load])
 
-  const action: 'clock_in' | 'clock_out' | null = !today?.check_in ? 'clock_in' : !today.check_out ? 'clock_out' : null
-
-  if (!ready || !employeeId) return null
-
-  const label = action === 'clock_in' ? 'Check-in' : action === 'clock_out' ? `Entrada ${formatTime(today!.check_in!)}` : 'Dia completo'
+  if (!employee) return null
+  const done = today?.check_in && today?.check_out
+  const next = done ? null : today?.check_in ? 'clock_out' : 'clock_in'
 
   return (
     <>
-      <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2.5 print:hidden">
-        <span className="hidden rounded-full border border-line bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm sm:block">{label}</span>
-        <button
-          type="button"
-          onClick={() => (action ? setOpen(true) : router.push('/admin/pontualidade'))}
-          aria-label={action === 'clock_in' ? 'Fazer check-in' : action === 'clock_out' ? 'Fazer check-out' : 'Ver registo de ponto'}
-          title={label}
-          className={
-            action === 'clock_in'
-              ? 'relative flex h-14 w-14 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg shadow-brand-600/30 transition-transform hover:scale-105 active:scale-95'
-              : action === 'clock_out'
-                ? 'flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 transition-transform hover:scale-105 active:scale-95'
-                : 'flex h-14 w-14 items-center justify-center rounded-full border border-line bg-white text-emerald-600 shadow-lg transition-transform hover:scale-105 active:scale-95'
-          }
-        >
-          {action === 'clock_in' && <span className="absolute inset-0 animate-ping rounded-full bg-brand-500/40" aria-hidden />}
-          {action === 'clock_in' ? <LogIn className="relative h-6 w-6" /> : action === 'clock_out' ? <LogOut className="h-6 w-6" /> : <ClipboardCheck className="h-6 w-6" />}
-        </button>
-      </div>
-      <FaceCapture open={open} action={action} employeeId={employeeId} onClose={() => setOpen(false)} onDone={() => { void load(); router.refresh() }} />
+      <button
+        type="button"
+        className={`clock-fab ${done ? 'clock-fab-done' : next === 'clock_out' ? 'clock-fab-out' : 'clock-fab-in'}`}
+        onClick={() => next && setOpen(next)}
+        title={done ? `Dia completo — entrada ${formatTime(today!.check_in!)} · saída ${formatTime(today!.check_out!)}` : next === 'clock_in' ? 'Marcar entrada (check-in)' : 'Registar saída (check-out)'}
+        aria-label={done ? 'Ponto do dia completo' : next === 'clock_in' ? 'Fazer check-in' : 'Fazer check-out'}
+      >
+        {done ? <ClipboardCheck className="h-6 w-6" /> : next === 'clock_in' ? <LogIn className="h-6 w-6" /> : <LogOut className="h-6 w-6" />}
+        <span className="clock-fab-ring" aria-hidden />
+        {!done && <Clock className="clock-fab-dot h-3 w-3" aria-hidden />}
+      </button>
+      <FaceCapture open={open !== false} action={open || null} employeeId={employee.id} employeeName={employee.full_name} onClose={() => setOpen(false)} onDone={() => { load(); router.refresh() }} />
     </>
   )
 }
