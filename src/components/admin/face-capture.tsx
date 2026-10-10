@@ -23,6 +23,9 @@ export function FaceCapture({ open, action, employeeId, employeeName, onClose, o
 
   const stop = React.useCallback(() => { streamRef.current?.getTracks().forEach((t) => t.stop()); streamRef.current = null }, [])
 
+  const successTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const finish = React.useCallback(() => { if (successTimer.current) clearTimeout(successTimer.current); onDone(); onClose() }, [onDone, onClose])
+
   React.useEffect(() => {
     if (!open) return
     setPhase('camera'); setShot(null)
@@ -41,7 +44,8 @@ export function FaceCapture({ open, action, employeeId, employeeName, onClose, o
 
   const capture = () => {
     const v = videoRef.current; if (!v) return
-    const c = document.createElement('canvas'); c.width = v.videoWidth || 640; c.height = v.videoHeight || 480
+    if (!v.videoWidth || v.readyState < 2) { toast.error('Câmara a iniciar', 'Espera 1 segundo e toca em Verificar outra vez.'); return }
+    const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight
     c.getContext('2d')?.drawImage(v, 0, 0)
     setShot(c.toDataURL('image/jpeg', 0.8)); stop(); setPhase('review')
   }
@@ -77,7 +81,8 @@ export function FaceCapture({ open, action, employeeId, employeeName, onClose, o
         p_roles: ['super_admin', 'admin', 'manager'],
       })
       setPhase('success')
-      setTimeout(() => { onDone(); onClose() }, 1600)
+      // fica visível até o utilizador confirmar (máx 6s de auto-fecho)
+      successTimer.current = setTimeout(finish, 6000)
     } catch (e) {
       toast.error('Verificação falhou', (e as Error).message)
       setPhase('error')
@@ -94,7 +99,11 @@ export function FaceCapture({ open, action, employeeId, employeeName, onClose, o
 
         <div className={`face-oval ${phase === 'verifying' ? 'scanning' : ''} ${phase === 'success' ? 'ok' : ''} ${phase === 'error' ? 'err' : ''}`}>
           {phase === 'success' ? (
-            <div className="face-success"><CheckCircle2 /><span>{action === 'clock_out' ? 'Check-out' : 'Ponto'} marcado com sucesso</span></div>
+            <div className="face-success">
+              {shot && <img className="face-success-photo" src={shot} alt="" />}
+              <span className="face-success-badge"><CheckCircle2 /></span>
+              <span className="face-success-txt">{action === 'clock_out' ? 'Check-out' : 'Ponto'} marcado com sucesso</span>
+            </div>
           ) : shot ? (
             <img src={shot} alt="Fotografia captada" />
           ) : (
@@ -114,6 +123,7 @@ export function FaceCapture({ open, action, employeeId, employeeName, onClose, o
           )}
           {phase === 'verifying' && <span className="face-verifying">A analisar…</span>}
           {phase === 'error' && <button type="button" className="face-btn primary" onClick={retry}><RefreshCw className="h-4 w-4" /> Tentar de novo</button>}
+          {phase === 'success' && <button type="button" className="face-btn primary" onClick={finish}><CheckCircle2 className="h-4 w-4" /> Concluir</button>}
         </div>
       </div>
     </div>
