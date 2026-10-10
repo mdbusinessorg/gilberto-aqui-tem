@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { Smartphone, Search } from 'lucide-react'
 import { ProductGrid } from '@/components/store/product-card'
 import { EmptyState, Input, Select, Button } from '@/components/ui'
+import { CAT_PRIORITY, CAT_IMG, CAT_NAME } from '@/lib/store/cat-visual'
 
 export const metadata: Metadata = { title: 'Loja' }
 export const revalidate = 60
@@ -21,7 +22,19 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
     featured: searchParams.destaque === '1', promo: searchParams.promo === '1',
     inStock: searchParams.stock !== 'todos', page: searchParams.pag ? Number(searchParams.pag) : 1,
   }
-  const [{ products, total, page, perPage }, categories, brands, topRated] = await Promise.all([getProducts(filters), getCategories(), getBrands(), getProducts({ sort: 'rating', inStock: true, perPage: 4 })])
+  const [{ products, total, page, perPage }, categories, brands, topRated, allProducts] = await Promise.all([getProducts(filters), getCategories(), getBrands(), getProducts({ sort: 'rating', inStock: true, perPage: 4 }), getProducts({ inStock: true, perPage: 96 })])
+  const catTiles = categories
+    .filter((c) => !c.parent_id)
+    .map((c) => ({
+      slug: c.slug,
+      name: CAT_NAME[c.slug] ?? c.name,
+      img: CAT_IMG[c.slug] ?? allProducts.products.find((p) => p.category_slug === c.slug)?.image_url ?? null,
+      multi: c.slug === 'laptops' ? 'laptops,macbook' : null,
+    }))
+    .sort((a, b) => {
+      const ia = CAT_PRIORITY.indexOf(a.slug), ib = CAT_PRIORITY.indexOf(b.slug)
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib)
+    })
   const pages = Math.ceil(total / perPage)
   const qs = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams()
@@ -46,13 +59,18 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
           </form>
 
           {/* Categorias */}
-          <nav className="rounded-md border border-line">
-            <p className="border-b border-line px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-ink">Categorias</p>
-            <ul className="divide-y divide-line">
-              {categories.map((c) => (
-                <li key={c.id}><Link href={qs({ categoria: c.slug, pag: '1' })} className={`block px-4 py-2 text-[13px] hover:bg-surface ${filters.category === c.slug ? 'font-semibold text-brand-700' : 'text-ink-soft'}`}>{c.name}</Link></li>
-              ))}
-            </ul>
+          <nav className="lj-cats" aria-label="Categorias">
+            {catTiles.map((c) => {
+              const active = c.multi ? searchParams.categorias === c.multi : filters.category === c.slug
+              return (
+                <Link key={c.slug} href={qs({ categoria: c.multi ? undefined : c.slug, categorias: c.multi ?? undefined, pag: '1' })} className={`lj-cat ${active ? 'is-on' : ''}`}>
+                  <span className="lj-cat-img">
+                    {c.img ? <Image src={c.img} alt="" fill sizes="64px" style={{ objectFit: 'contain' }} /> : <Smartphone className="h-7 w-7 text-ink-muted/40" />}
+                  </span>
+                  <span className="lj-cat-name">{c.name}</span>
+                </Link>
+              )
+            })}
           </nav>
 
           {/* Melhor avaliados */}

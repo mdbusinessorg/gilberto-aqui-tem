@@ -625,6 +625,17 @@ body:has(.pd-page) .wa-float { display: none; }
 .sm-cat3:hover .sm-cat3-img { transform: scale(1.06) rotate(-2deg); }
 .sm-cat3-img img { object-fit: contain; }
 .sm-cat3-ico { display: grid; place-items: center; width: 100%; height: 100%; color: #94a3b8; }
+
+/* Categorias visuais na /loja */
+.lj-cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.lj-cat { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 9px; border-radius: 12px; border: 1px solid transparent; transition: transform .25s ease, border-color .25s ease, background .25s ease; }
+.lj-cat:hover { transform: translateY(-2px); border-color: #e2e8f0; }
+.lj-cat.is-on { border-color: #1546B8; background: #eef3ff; }
+.lj-cat-img { position: relative; width: 56px; height: 56px; display: grid; place-items: center; transition: transform .3s ease; }
+.lj-cat:hover .lj-cat-img { transform: scale(1.08); }
+.lj-cat-name { font-size: 11px; font-weight: 700; color: #1f2937; text-align: center; line-height: 1.2; }
+.lj-cat.is-on .lj-cat-name { color: #1546B8; }
+@media (min-width: 1024px) { .lj-cats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .sm-cat3-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .sm-cat3-txt strong { font-size: 16px; font-weight: 800; color: #111; }
 .sm-cat3-txt small { font-size: 12px; color: #6b7280; line-height: 1.35; }

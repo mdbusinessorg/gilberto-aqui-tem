@@ -6,6 +6,7 @@ import { Reveal } from '@/components/store/reveal'
 import { HeroSlider } from '@/components/store/hero-slider'
 import { Stars } from '@/components/ui'
 import { getProducts, getCategories, getBrands, getBanners } from '@/lib/store/queries'
+import { CAT_PRIORITY, CAT_IMG, CAT_HREF, CAT_NAME } from '@/lib/store/cat-visual'
 import { priceOf } from '@/lib/store/price'
 import { formatKz } from '@/lib/utils'
 import { waLink, supportMessage } from '@/lib/whatsapp'
@@ -18,19 +19,6 @@ const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   monitores: Laptop, informatica: Laptop,
 }
 
-const CAT_PRIORITY = ['iphone', 'samsung', 'tablets', 'laptops', 'monitores', 'informatica', 'audio', 'acessorios', 'playstation', 'airpods', 'apple-watch', 'android', 'macbook', 'outros']
-const CAT_IMG: Record<string, string> = {
-  iphone: 'https://hfwshixqfhrnxwtixoqr.supabase.co/storage/v1/object/public/products/hero/web-hero-iphone.png',
-  samsung: '/categorias/samsung.webp',
-  tablets: '/categorias/tablets.webp',
-  laptops: '/categorias/computadores.webp',
-  monitores: '/categorias/monitores.webp',
-  informatica: '/categorias/informatica.webp',
-  acessorios: '/categorias/acessorios.webp',
-}
-const CAT_HREF: Record<string, string> = {
-  laptops: '/loja?categorias=laptops,macbook',
-}
 export default async function HomePage() {
   const [recent, featured, promos, misc, popular, phones, audio, allProducts, categories, brands, banners] = await Promise.all([
     getProducts({ sort: 'recent', inStock: true, perPage: 3 }),
@@ -64,7 +52,7 @@ export default async function HomePage() {
   const catTiles = topCategories
     .map(c => ({
       slug: c.slug,
-      name: c.slug === 'laptops' ? 'Computadores' : c.name,
+      name: CAT_NAME[c.slug] ?? c.name,
       href: CAT_HREF[c.slug] ?? `/loja?categoria=${c.slug}`,
       img: CAT_IMG[c.slug] ?? catImage(c.slug),
       icon: CATEGORY_ICONS[c.slug] ?? Grid2X2,
