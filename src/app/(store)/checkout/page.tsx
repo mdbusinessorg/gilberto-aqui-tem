@@ -48,6 +48,17 @@ export default function CheckoutPage() {
     if (error) { toast.error('Não foi possível criar o pedido', error.message); return }
     const res = data as { order_number: string; total: number }
     setDone({ number: res.order_number, total: res.total })
+    if (form.email) {
+      void fetch('/api/email/encomenda', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: form.email, name: form.name, number: res.order_number, total: res.total,
+          phone: form.phone, delivery: form.delivery, address: form.address || null, payment: form.payment,
+          items: items.map((i) => ({ name: i.name, qty: i.quantity, price: i.price, image: i.image })),
+        }),
+      }).catch(() => {})
+    }
     clear()
   }
 
