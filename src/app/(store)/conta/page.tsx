@@ -11,6 +11,7 @@ import { SignOutButton } from './sign-out'
 import { WheelSection } from './wheel'
 import { RedeemCard } from './redeem'
 import { ClockCamera } from '@/components/admin/clock-camera'
+import { ClockFab } from '@/components/admin/clock-fab'
 import { STAFF_ROLES } from '@/lib/labels'
 import { todayISO } from '@/lib/utils'
 
@@ -106,6 +107,7 @@ export default async function AccountPage() {
           </CardBody>
         </Card>
       </div>
+      {employee && <ClockFab />}
     </div>
   )
 }
