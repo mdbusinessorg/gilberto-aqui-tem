@@ -3,6 +3,7 @@ import { formatKz } from '@/lib/utils'
 
 type Item = { name: string; qty: number; price: number; image?: string | null }
 type Body = {
+  kind?: 'confirmado' | 'entregue'
   to: string
   name: string
   number: string
@@ -41,15 +42,21 @@ function html(b: Body) {
   const items = (b.items ?? []).map(itemRow).join('')
   const delivery = b.delivery === 'entrega' ? 'Entrega ao domicílio' : 'Levantamento na loja'
   const invoice = `${SITE}/fatura?n=${encodeURIComponent(b.number)}&t=${encodeURIComponent(b.phone ?? '')}`
+  const entregue = b.kind === 'entregue'
+  const heading = entregue ? 'O teu produto foi entregue!' : 'Woohoo! O teu pedido está confirmado.'
+  const lead = entregue
+    ? `O teu pedido <strong>${esc(b.number)}</strong> já foi entregue pela <strong>Gilberto Aqui Tem</strong>.<br/>Esperamos que gostes da tua compra — e obrigado pela preferência.`
+    : `A <strong>Gilberto Aqui Tem</strong> já recebeu o teu pedido <strong>${esc(b.number)}</strong> e vai começar a prepará-lo.<br/>Entramos em contacto contigo no WhatsApp para confirmar.`
+  const cta = entregue ? 'Baixar a tua fatura' : 'Ver o teu pedido'
   return `<!doctype html><html><body style="margin:0;padding:0;background:#f6f7f9;font-family:Arial,Helvetica,sans-serif">
   <div style="max-width:560px;margin:0 auto;padding:24px 16px">
     <div style="text-align:center;padding:18px 0"><img src="${LOGO}" alt="Gilberto Aqui Tem" width="170" style="max-width:170px" /></div>
     <div style="background:#fff;border-radius:16px;padding:32px 28px;border:1px solid #ececf0">
-      <h1 style="margin:0 0 10px;font-size:24px;color:#111;text-align:center">Woohoo! O teu pedido está confirmado.</h1>
-      <p style="margin:0 0 22px;color:#4b5563;text-align:center;font-size:14px">A <strong>Gilberto Aqui Tem</strong> já recebeu o teu pedido <strong>${esc(b.number)}</strong> e vai começar a prepará-lo.<br/>Entramos em contacto contigo no WhatsApp para confirmar.</p>
+      <h1 style="margin:0 0 10px;font-size:24px;color:#111;text-align:center">${heading}</h1>
+      <p style="margin:0 0 22px;color:#4b5563;text-align:center;font-size:14px">${lead}</p>
 
       <div style="text-align:center;margin:6px 0 26px">
-        <a href="${invoice}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:700;padding:13px 30px;border-radius:999px;font-size:14px">Ver o teu pedido</a>
+        <a href="${invoice}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;font-weight:700;padding:13px 30px;border-radius:999px;font-size:14px">${cta}</a>
       </div>
 
       <h2 style="font-size:16px;color:#111;margin:0 0 6px">Detalhes do pedido</h2>
@@ -96,7 +103,7 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       sender,
       to: [{ email: b.to, name: b.name || b.to }],
-      subject: `Pedido ${b.number} confirmado — Gilberto Aqui Tem`,
+      subject: b.kind === 'entregue' ? `Pedido ${b.number} entregue — Gilberto Aqui Tem` : `Pedido ${b.number} confirmado — Gilberto Aqui Tem`,
       htmlContent: html(b),
     }),
   })
